@@ -6,7 +6,10 @@ using Automation.Win32API;
 
 namespace Automation
 {
-    public abstract class AutomationThread : IDisposable
+	/// <summary>
+	/// 负责与目标窗口进行互动的抽象线程类
+	/// </summary>
+	public abstract class AutomationThread : IDisposable
 	{
 		#region 公开属性
 		/// <summary>
@@ -112,7 +115,7 @@ namespace Automation
 		#region 线程操作
 		/// <summary> 
 		/// 启动线程
-		/// <param name="form">接受线程消息的窗口，通常是程序主窗口</param> 
+		/// <param name="messageForm">接受线程消息的窗口，通常是程序主窗口</param>
 		/// <param name="tickInterval">监控线程tick间隔（毫秒），如果为0则不启动监控线程</param> 
 		/// </summary>
 		public virtual bool Start(Form messageForm, int tickInterval = 1000)
@@ -217,14 +220,34 @@ namespace Automation
 			m_thread.Lock(obj);
 		}
 
-		#endregion		
+		#endregion
 
-		#region 可重载函数	
+		#region 可重载函数
+		/// <summary> 
+		/// 在线程启动前进行一次回调检查
+		/// <returns>如果允许线程启动返回true，否则返回false</returns>
+		/// </summary>
 		protected virtual bool PreStart() { return true; } // 开始前状态检查，返回true启动线程
-		protected virtual void OnStart() {}	// 线程开始
-		protected virtual void OnStop()	{} // 线程结束		
-		protected virtual void OnTick() {} // 线程活动期间每隔0.2秒调用一次，除非必要否则不建议重载
-		protected abstract void ThreadProc(); // 线程工作函数
+
+		/// <summary> 
+		/// 线程已启动
+		/// </summary>
+		protected virtual void OnStart() {} // 线程开始
+
+		/// <summary> 
+		/// 线程已终止
+		/// </summary>
+		protected virtual void OnStop()	{} // 线程结束	
+
+		/// <summary> 
+		/// 线程活动期间每隔0.2秒调用一次，除非必要否则不建议重载
+		/// </summary>
+		protected virtual void OnTick() {}
+
+		/// <summary> 
+		/// 线程工作函数，非abstract的继承类必须加载
+		/// </summary>
+		protected abstract void ThreadProc();
 		#endregion
 
 		#region 消息接受窗口交互
@@ -247,6 +270,12 @@ namespace Automation
 		#endregion
 
 		#region 目标窗口常用操作
+		/// <summary> 
+		/// 为线程设置目标窗口
+		/// <param name="windowName">窗口标题</param> 
+		/// <param name="windowClass">窗口类名</param> 
+		/// <returns>如果窗口存在返回true，否则返回false</returns>
+		/// </summary>
 		public virtual bool SetTargetWnd(string windowName, string windowClass = null)
 		{
 			IntPtr targetWnd = IntPtr.Zero;
@@ -421,12 +450,18 @@ namespace Automation
 		#endregion
 
 		#region IDisposable接口实现
+		/// <summary> 
+		/// 由外部调用，销毁对象
+		/// </summary>
 		public virtual void Dispose()
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
 
+		/// <summary> 
+		/// 用于释放非托管资源
+		/// </summary>
 		protected virtual void Dispose(bool disposing)
 		{
 			// Check to see if Dispose has already been called.
