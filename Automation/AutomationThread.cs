@@ -439,7 +439,7 @@ namespace Automation
 		/// 发送执行某个操作前先延迟一段时间以确保稳定性，同时检查线程Pause状态
 		/// <param name="milliseconds">延迟毫秒数</param> 
 		/// </summary>
-		public void DelayBeforeAction(int milliseconds = 200)
+		public void DelayBeforeAction(int milliseconds = 500)
 		{
 			Sleep(milliseconds);
 			while (_NeedPauseThreads())
