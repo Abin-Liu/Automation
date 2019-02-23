@@ -6,8 +6,6 @@ namespace Automation
 {
 	public class AutomationForm : Form
 	{
-		public static readonly int WM_HOTKEY_PAUSE = 1; // Pause key id
-
 		public virtual bool IsAlive { get { return m_thread.IsAlive; } }
 		public bool Aborted { get { return m_thread.Aborted; } }
 
@@ -31,13 +29,20 @@ namespace Automation
 			m_thread.Stop();
 		}
 
-		public virtual void Message(string text, MessageBoxIcon icon = MessageBoxIcon.Exclamation)
+		public bool Confirm(string text)
+		{
+			return Message(text, MessageBoxIcon.Question, MessageBoxButtons.OKCancel) == DialogResult.OK;
+		}
+
+		public DialogResult Message(string text, MessageBoxIcon icon = MessageBoxIcon.Exclamation, MessageBoxButtons buttons = MessageBoxButtons.OK)
 		{
 			if (string.IsNullOrEmpty(text))
 			{
-				return;
+				return DialogResult.Cancel;
 			}
 
+			// 显示消息框前必须先使监控线程暂停
+			m_thread.Paused = true;
 			if (Window.GetForegroundWindow() != this.Handle)
 			{
 				if (Window.IsIconic(this.Handle))
@@ -45,42 +50,57 @@ namespace Automation
 					Window.ShowWindow(this.Handle, Window.SW_RESTORE); // 如果最小化先恢复
 				}
 				Window.SetForegroundWindow(this.Handle);
-			}			
+			}
 
-			MessageBox.Show(this, text, Application.ProductName, MessageBoxButtons.OK, icon);
+			DialogResult result = MessageBox.Show(this, text, Application.ProductName, buttons, icon);
+			m_thread.Paused = false;
+			return result;
 		}
 
+		// 可重载方法
 		protected virtual void OnThreadStart() { }
 		protected virtual void OnThreadAbort() { }
 		protected virtual void OnThreadStop() { }
+		protected virtual void OnHotkey(int id) { }
+		protected virtual void OnThreadMessage(int wParam, int lParam) { }
+		protected virtual void OnMessage(int message, IntPtr wParam, IntPtr lParam) { }
+
+		protected bool RegisterHotkey(int id, Keys key, int modifiers = 0)
+		{
+			return Hotkey.RegisterHotKey(this.Handle, id, modifiers, key);
+		}
+
+		protected void UnregisterHotKey(int id)
+		{
+			Hotkey.UnregisterHotKey(this.Handle, id);
+		}
 
 		// 继承Form必须在Form_Load中调用base.OnFormLoad(sender, e)
 		protected virtual void Form_OnLoad(object sender, EventArgs e)
 		{
-			if (!Hotkey.RegisterHotKey(this.Handle, WM_HOTKEY_PAUSE, Hotkey.MOD_NONE, Keys.Pause))
+			if (!RegisterHotkey(WM_HOTKEY_PAUSE, Keys.Pause, Hotkey.MOD_NONE))
 			{
-				MessageBox.Show(this, "注册快捷键PAUSE失败，请先关闭占用此键的应用程序，然后重试。", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+				Message("注册快捷键PAUSE失败，请先关闭占用此键的应用程序，然后重试。");
 			}
 		}
 
 		// 继承Form必须在Form_OnClosing中调用base.OnFormClosing(sender, e)
 		protected virtual void Form_OnClosing(object sender, FormClosingEventArgs e)
 		{
-			if (!m_thread.IsAlive)
+			if (m_thread.IsAlive)
 			{
-				return;
+				// 如果线程仍在运行中，需要用户确认是否真的退出
+				e.Cancel = !Confirm("线程尚未结束，是否仍然结束运行？");
 			}
-
-			DialogResult result = MessageBox.Show(this, "线程尚未结束，是否仍然结束运行？", Application.ProductName, MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
-			e.Cancel = result != DialogResult.OK;
 		}
 
 		// 继承Form必须在Form_OnClosed中调用base.OnFormClosed(sender, e)
 		protected virtual void Form_OnClosed(object sender, FormClosedEventArgs e)
-		{			
+		{
+			UnregisterHotKey(WM_HOTKEY_PAUSE);
 			m_thread.Stop();
 			m_thread.Alerting = false;
-			Hotkey.UnregisterHotKey(this.Handle, WM_HOTKEY_PAUSE);
+			m_thread.Dispose();
 		}
 
 		public static int IntPtrToInt(IntPtr p)
@@ -101,7 +121,7 @@ namespace Automation
 			IntPtr wParam = m.WParam;
 			IntPtr lParam = m.LParam;
 
-			if (message == 0x0312) // #define WM_HOTKEY 0x0312
+			if (message == 0x0312) // Win32 WM_HOTKEY = 0x0312
 			{
 				int id = IntPtrToInt(wParam);
 				if (id == WM_HOTKEY_PAUSE)
@@ -144,9 +164,7 @@ namespace Automation
 			base.WndProc(ref m);
 		}
 
-		protected virtual void OnHotkey(int id) { }
-		protected virtual void OnThreadMessage(int wParam, int lParam) { }
-		protected virtual void OnMessage(int message, IntPtr wParam, IntPtr lParam) { }
+		private static readonly int WM_HOTKEY_PAUSE = 9035; // Pause key id
 		private AutomationThread m_thread = null;
 	}
 }

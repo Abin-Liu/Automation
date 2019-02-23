@@ -5,7 +5,7 @@ namespace Automation
 {
 	delegate void EventThreadHandler();
 
-	class EventThread
+	class EventThread : IDisposable
 	{
 		public EventThreadHandler OnStart { get; set; } // Called when the thread starts
 		public EventThreadHandler OnStop { get; set; } // Called when the thread is stopped
@@ -49,6 +49,31 @@ namespace Automation
 		public EventThread(bool background = false)
 		{
 			m_background = background;
+		}
+
+		~EventThread()
+		{
+			Dispose(false);
+		}
+
+		public virtual void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		protected virtual void Dispose(bool disposing)
+		{
+			// Check to see if Dispose has already been called.
+			if (!this.m_disposed)
+			{
+				if (disposing)
+				{					
+				}
+
+				Stop();
+				m_disposed = true;
+			}
 		}
 
 		public virtual void Start()
@@ -103,6 +128,7 @@ namespace Automation
 
 		private bool m_background = false;
 		private Thread m_thread = null;
+		private bool m_disposed = false;
 	}	
 
 	class TickThread : EventThread

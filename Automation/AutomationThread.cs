@@ -6,8 +6,8 @@ using Automation.Win32API;
 
 namespace Automation
 {
-    public abstract class AutomationThread
-    {
+    public abstract class AutomationThread : IDisposable
+	{
 		#region 公开属性
 		/// <summary>
 		/// 目标窗口名称，用以在线程启动时寻找目标窗口
@@ -72,27 +72,40 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 属性，get 检查线程是否运行中
+		/// 检查线程是否运行中
 		/// </summary> 
 		public bool IsAlive { get { return m_thread.IsAlive; } }
 
 		/// <summary> 
-		/// 属性，get 检查线程是否由用户提前终止
+		/// 检查线程是否由用户提前终止
 		/// </summary> 
 		public bool Aborted { get { return m_thread.Aborted; } }
+
+		/// <summary> 
+		/// 暂停/继续监控线程
+		/// </summary> 
+		public bool Paused { get; set; } = false;
 		#endregion
 
-		#region 构造函数
+		#region 构造/析构函数
 		/// <summary> 
 		/// 默认构造函数
 		/// </summary>
 		public AutomationThread()
 		{
-			m_thread.OnStart = new EventThreadHandler(_OnStart);
-			m_thread.OnStop = new EventThreadHandler(_OnStop);
-			m_thread.ThreadProc = new EventThreadHandler(_ThreadProc);
-			m_ticker.OnTick = new EventThreadHandler(_OnTick);
+			m_thread.OnStart = _OnStart;
+			m_thread.OnStop = _OnStop;
+			m_thread.ThreadProc = _ThreadProc;
+			m_ticker.OnTick = _OnTick;
 			
+		}
+
+		/// <summary> 
+		///析构函数
+		/// </summary>
+		~AutomationThread()
+		{
+			Dispose(false);
 		}
 		#endregion
 
@@ -104,7 +117,12 @@ namespace Automation
 		/// </summary>
 		public virtual bool Start(Form messageForm, int tickInterval = 1000)
 		{
-			LastError = null;
+			if (IsAlive)
+			{
+				LastError = "线程已经在运行中。";
+				return false;
+			}
+
 			TargetWnd = IntPtr.Zero;
 
 			// 线程启动前必须先定位目标窗口
@@ -127,6 +145,9 @@ namespace Automation
 				LastError = "创建DC失败。";
 				return false;
 			}
+
+			LastError = null;
+			Paused = false;
 
 			if (!PreStart())
 			{
@@ -157,8 +178,8 @@ namespace Automation
 		{
 			m_ticker.Stop();
 			m_thread.Stop();
-		}
-
+		}		
+		
 		/// <summary> 
 		/// 当前线程休眠
 		/// <param name="milliseconds">休眠毫秒数</param> 
@@ -196,8 +217,7 @@ namespace Automation
 			m_thread.Lock(obj);
 		}
 
-		#endregion
-
+		#endregion		
 
 		#region 可重载函数	
 		protected virtual bool PreStart() { return true; } // 开始前状态检查，返回true启动线程
@@ -385,6 +405,46 @@ namespace Automation
 			MouseMove(x, y);
 			Input.MouseClick(MouseButtons.Middle);
 		}
+
+		/// <summary> 
+		/// 发送执行某个操作前先延迟一段时间以确保稳定性，同时检查线程Pause状态
+		/// <param name="milliseconds">延迟毫秒数</param> 
+		/// </summary>
+		public void DelayBeforeAction(int milliseconds = 200)
+		{
+			Sleep(milliseconds);
+			while (_NeedPauseThreads())
+			{
+				Sleep(2000);
+			}
+		}
+		#endregion
+
+		#region IDisposable接口实现
+		public virtual void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		protected virtual void Dispose(bool disposing)
+		{
+			// Check to see if Dispose has already been called.
+			if (!this.m_disposed)
+			{
+				if (disposing)
+				{					
+					m_ticker.Dispose();
+					m_thread.Dispose();
+					m_soundPlayerStart.Dispose();
+					m_soundPlayerStop.Dispose();
+					m_soundPlayerAlert.Dispose();
+				}
+
+				ReleaseDC();
+				m_disposed = true;
+			}
+		}
 		#endregion
 
 		#region 私有成员
@@ -395,6 +455,12 @@ namespace Automation
 		private SoundPlayer m_soundPlayerStart = new SoundPlayer(Resources.ResourceManager.GetStream("Start"));
 		private SoundPlayer m_soundPlayerStop = new SoundPlayer(Resources.ResourceManager.GetStream("Stop"));
 		private SoundPlayer m_soundPlayerAlert = new SoundPlayer(Resources.ResourceManager.GetStream("Alert"));
+		private bool m_disposed = false;
+
+		private bool _NeedPauseThreads()
+		{
+			return Paused || Window.GetForegroundWindow() == m_messageWnd;
+		}
 
 		private void _OnStart()
 		{
@@ -410,7 +476,7 @@ namespace Automation
 		}
 
 		private void _OnStop()
-		{			
+		{
 			m_soundPlayerStop.Play();			
 			OnStop();
 			ReleaseDC();
@@ -425,21 +491,23 @@ namespace Automation
 		// 周期性检查目标窗口状态
 		private void _OnTick()
 		{
-			if (TargetWnd != IntPtr.Zero)
+			if (TargetWnd == IntPtr.Zero || _NeedPauseThreads())
 			{
-				if (!Window.IsWindow(TargetWnd) || !Window.IsWindowVisible(TargetWnd))
-				{
-					Stop();
-					return;
-				}
-				else
-				{
-					IntPtr foregroundWnd = Window.GetForegroundWindow();
-					if (foregroundWnd != TargetWnd && foregroundWnd != m_messageWnd)
-					{
-						SetTargetWndForeground();
-					}										
-				}
+				return;
+			}
+
+			// 目标窗口已关闭或被隐藏，直接终止线程
+			if (!Window.IsWindow(TargetWnd) || !Window.IsWindowVisible(TargetWnd))
+			{
+				Stop();
+				return;
+			}
+
+			// 确保目标窗口在最前台，但允许消息接收窗口在前台（用户正在操作GUI）
+			IntPtr foregroundWnd = Window.GetForegroundWindow();
+			if (foregroundWnd != TargetWnd && foregroundWnd != m_messageWnd)
+			{
+				SetTargetWndForeground();
 			}
 
 			OnTick();
