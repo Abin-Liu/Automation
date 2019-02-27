@@ -52,6 +52,21 @@ namespace Automation
 		}
 
 		/// <summary>
+		/// 开/关线程，取决于当前线程是否运行中
+		/// </summary>
+		public virtual void ToggleThread()
+		{
+			if (IsAlive)
+			{
+				StopThread();
+			}
+			else
+			{
+				StartThread();
+			}
+		}
+
+		/// <summary>
 		/// 显示一个确认对话框
 		/// <param name="text">对话框内容文字</param> 
 		/// <returns>如果用户点击了OK按钮返回true，否则返回false</returns>
@@ -198,14 +213,7 @@ namespace Automation
 				int id = IntPtrToInt(wParam);
 				if (id == WM_HOTKEY_PAUSE)
 				{
-					if (IsAlive)
-					{
-						StopThread();
-					}
-					else
-					{
-						StartThread();
-					}
+					ToggleThread();
 				}
 				else
 				{

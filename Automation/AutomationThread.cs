@@ -318,7 +318,29 @@ namespace Automation
 			}
 			Window.SetForegroundWindow(TargetWnd);
 		}
+		
+		public Rectangle GetClientRect()
+		{
+			Rectangle rect = new Rectangle(0, 0, 0, 0);
+			Window.GetClientRect(TargetWnd, out rect);
+			return rect;
+		}
 
+		/// <summary> 
+		/// 发送执行某个操作前先延迟一段时间以确保稳定性，同时检查线程Pause状态
+		/// <param name="milliseconds">延迟毫秒数</param> 
+		/// </summary>
+		public void DelayBeforeAction(int milliseconds = 500)
+		{
+			Sleep(milliseconds);
+			while (_NeedPauseThreads())
+			{
+				Sleep(2000);
+			}
+		}
+		#endregion
+
+		#region 目标窗口坐标位置换算
 		/// <summary> 
 		/// 将目标窗口的客户端坐标转换为屏幕坐标
 		/// <param name="x">客户端坐标x</param> 
@@ -339,7 +361,9 @@ namespace Automation
 		{
 			return Window.ClientToScreen(TargetWnd, point);
 		}
+		#endregion
 
+		#region 目标窗口像素RGB值获取
 		/// <summary> 
 		/// 获取目标窗口客户端指定坐标位置的像素RGB值
 		/// <param name="x">客户端坐标x</param> 
@@ -392,6 +416,51 @@ namespace Automation
 		}
 
 		/// <summary> 
+		/// 合成RGB值
+		/// <param name="r">R值部分</param> 
+		/// <param name="g">G值部分</param> 
+		/// <param name="b">B值部分</param>
+		/// <returns>合成的RGB值</returns>
+		/// </summary>
+		public static int RGB(byte r, byte g, byte b)
+		{
+			return GDI.RGB(r, g, b);
+		}
+
+		/// <summary> 
+		/// 提取RGB值中的R值部分		
+		/// <param name="color">RGB值</param>
+		/// <returns>R值部分</returns>
+		/// </summary>
+		public static byte GetRValue(int color)
+		{
+			return GDI.GetRValue(color);
+		}
+
+		/// <summary> 
+		/// 提取RGB值中的G值部分		
+		/// <param name="color">RGB值</param>
+		/// <returns>G值部分</returns>
+		/// </summary>
+		public static byte GetGValue(int color)
+		{
+			return GDI.GetGValue(color);
+		}
+
+		/// <summary> 
+		/// 提取RGB值中的B值部分		
+		/// <param name="color">RGB值</param>
+		/// <returns>B值部分</returns>
+		/// </summary>
+		public static byte GetBValue(int color)
+		{
+			return GDI.GetBValue(color);
+		}
+
+		#endregion
+
+		#region 目标窗口鼠标交互
+		/// <summary> 
 		/// 将鼠标移动到目标窗口客户端指定坐标位置
 		/// <param name="x">客户端坐标x</param> 
 		/// <param name="y">客户端坐标y</param> 
@@ -413,6 +482,17 @@ namespace Automation
 			Input.MouseClick(MouseButtons.Left);
 		}
 
+		public void LeftDown(int x, int y)
+		{
+			MouseMove(x, y);
+			Input.MouseDown(MouseButtons.Left);
+		}
+
+		public void LeftUp()
+		{
+			Input.MouseUp(MouseButtons.Left);
+		}
+
 		/// <summary> 
 		/// 在目标窗口客户端指定坐标位置点击鼠标右键
 		/// <param name="x">客户端坐标x</param> 
@@ -422,6 +502,17 @@ namespace Automation
 		{
 			MouseMove(x, y);
 			Input.MouseClick(MouseButtons.Right);
+		}
+
+		public void RightDown(int x, int y)
+		{
+			MouseMove(x, y);
+			Input.MouseDown(MouseButtons.Right);
+		}
+
+		public void RightUp()
+		{
+			Input.MouseUp(MouseButtons.Right);
 		}
 
 		/// <summary> 
@@ -435,19 +526,31 @@ namespace Automation
 			Input.MouseClick(MouseButtons.Middle);
 		}
 
-		/// <summary> 
-		/// 发送执行某个操作前先延迟一段时间以确保稳定性，同时检查线程Pause状态
-		/// <param name="milliseconds">延迟毫秒数</param> 
-		/// </summary>
-		public void DelayBeforeAction(int milliseconds = 500)
+		public void MouseWheel(bool scrollUp)
 		{
-			Sleep(milliseconds);
-			while (_NeedPauseThreads())
-			{
-				Sleep(2000);
-			}
+			Input.MouseWheel(scrollUp);
 		}
 		#endregion
+
+		#region 目标窗口键盘交互
+		public enum ModKeys { None = 0, Shift = 0x01, Control = 0x02, Alt = 0x04 }
+
+		public void KeyStroke(Keys key, ModKeys mods = ModKeys.None)
+		{
+			KeyDown(key, mods);			
+			KeyUp(key, mods);
+		}
+
+		public void KeyDown(Keys key, ModKeys mods = ModKeys.None)
+		{
+			Input.KeyDown(key, (Input.ModKeys)mods);
+		}
+
+		public void KeyUp(Keys key, ModKeys mods = ModKeys.None)
+		{
+			Input.KeyUp(key, (Input.ModKeys)mods);
+		}
+		#endregion		
 
 		#region IDisposable接口实现
 		/// <summary> 
