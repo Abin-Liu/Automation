@@ -20,6 +20,16 @@ namespace Automation
 		public bool Aborted { get { return m_thread.Aborted; } }
 
 		/// <summary>
+		/// 是否自动注册Pause键
+		/// </summary>
+		protected bool UsePauseKey { get; set; } = false;
+
+		/// <summary>
+		/// 是否隐藏主窗口
+		/// </summary>
+		protected bool HideForm { get; set; } = false;
+
+		/// <summary>
 		/// 设置线程对象
 		/// <param name="thread">由继承类创建的线程对象</param> 
 		/// </summary>
@@ -147,12 +157,12 @@ namespace Automation
 		/// 注册一个热键，用户在任何场合按下此键，本窗口都会收到消息
 		/// <param name="id">热键ID</param>
 		/// <param name="key">键位</param>
-		/// <param name="modifiers">辅助键（Ctrl, Alt, Shift），可通过|混合多个辅助键</param>
+		/// <param name="mods">辅助键（Ctrl, Alt, Shift），可通过|混合多个辅助键</param>
 		/// <returns>注册成功返回true，否则返回false</returns>
 		/// </summary>
-		protected bool RegisterHotKey(int id, Keys key, int modifiers = 0)
+		protected bool RegisterHotKey(int id, Keys key, ModKeys mods = ModKeys.None)
 		{
-			return Hotkey.RegisterHotKey(this.Handle, id, modifiers, key);
+			return Hotkey.RegisterHotKey(this.Handle, id, key, mods);
 		}
 
 		/// <summary>
@@ -169,7 +179,13 @@ namespace Automation
 		/// </summary>
 		protected virtual void Form_OnLoad(object sender, EventArgs e)
 		{
-			if (!RegisterHotKey(WM_HOTKEY_PAUSE, Keys.Pause, Hotkey.MOD_NONE))
+			if (HideForm)
+			{
+				this.Hide();
+				this.ShowInTaskbar = false;
+			}
+
+			if (UsePauseKey && !RegisterHotKey(WM_HOTKEY_PAUSE, Keys.Pause))
 			{
 				Message("注册快捷键PAUSE失败，请先关闭占用此键的应用程序，然后重试。");
 			}
@@ -192,7 +208,11 @@ namespace Automation
 		/// </summary>
 		protected virtual void Form_OnClosed(object sender, FormClosedEventArgs e)
 		{
-			UnregisterHotKey(WM_HOTKEY_PAUSE);
+			if (UsePauseKey)
+			{
+				UnregisterHotKey(WM_HOTKEY_PAUSE);
+			}
+			
 			m_thread.Stop();
 			m_thread.Alerting = false;
 			m_thread.Dispose();

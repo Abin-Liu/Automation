@@ -465,6 +465,18 @@ namespace Automation
 
 		#region 目标窗口鼠标交互
 		/// <summary> 
+		/// 在目标窗口客户端指定坐标位置点击鼠标键
+		/// <param name="x">客户端坐标x</param> 
+		/// <param name="y">客户端坐标y</param> 
+		/// <param name="button">鼠标按键</param> 
+		/// </summary>
+		public void MouseClick(int x, int y, MouseButtons button = MouseButtons.Left)
+		{
+			MouseMove(x, y);
+			Input.MouseClick(button);
+		}
+
+		/// <summary> 
 		/// 将鼠标移动到目标窗口客户端指定坐标位置
 		/// <param name="x">客户端坐标x</param> 
 		/// <param name="y">客户端坐标y</param> 
@@ -476,72 +488,34 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 在目标窗口客户端指定坐标位置点击鼠标左键
-		/// <param name="x">客户端坐标x</param> 
-		/// <param name="y">客户端坐标y</param> 
+		/// 模拟鼠标键被按下
+		/// <param name="button">鼠标按键</param> 
 		/// </summary>
-		public void LeftClick(int x, int y)
+		public static void MouseDown(MouseButtons button = MouseButtons.Left)
 		{
-			MouseMove(x, y);
-			Input.MouseClick(MouseButtons.Left);
-		}
-
-		public void LeftDown(int x, int y)
-		{
-			MouseMove(x, y);
-			Input.MouseDown(MouseButtons.Left);
-		}
-
-		public void LeftUp()
-		{
-			Input.MouseUp(MouseButtons.Left);
+			Input.MouseDown(button);
 		}
 
 		/// <summary> 
-		/// 在目标窗口客户端指定坐标位置点击鼠标右键
-		/// <param name="x">客户端坐标x</param> 
-		/// <param name="y">客户端坐标y</param> 
+		/// 模拟鼠标键被松开
+		/// <param name="button">鼠标按键</param> 
 		/// </summary>
-		public void RightClick(int x, int y)
+		public static void MouseUp(MouseButtons button = MouseButtons.Left)
 		{
-			MouseMove(x, y);
-			Input.MouseClick(MouseButtons.Right);
-		}
-
-		public void RightDown(int x, int y)
-		{
-			MouseMove(x, y);
-			Input.MouseDown(MouseButtons.Right);
-		}
-
-		public void RightUp()
-		{
-			Input.MouseUp(MouseButtons.Right);
+			Input.MouseUp(button);
 		}
 
 		/// <summary> 
-		/// 在目标窗口客户端指定坐标位置点击鼠标中键
-		/// <param name="x">客户端坐标x</param> 
-		/// <param name="y">客户端坐标y</param> 
+		/// 模拟鼠标滚轮被转动
+		/// <param name="scrollUp">滚轮转动方向</param> 
 		/// </summary>
-		public void MiddleClick(int x, int y)
-		{
-			MouseMove(x, y);
-			Input.MouseClick(MouseButtons.Middle);
-		}
-
-		public void MouseWheel(bool scrollUp)
+		public static void MouseWheel(bool scrollUp)
 		{
 			Input.MouseWheel(scrollUp);
 		}
 		#endregion
 
 		#region 目标窗口键盘交互
-
-		/// <summary> 
-		/// 定义辅助按键Shift, Control, Alt，可通过|操作符合并
-		/// </summary>
-		public enum ModKeys { None = 0, Shift = 0x01, Control = 0x02, Alt = 0x04 }		
 
 		/// <summary> 
 		/// 模拟键盘按键		
@@ -636,7 +610,7 @@ namespace Automation
 		/// </summary>
 		public static void KeyDown(Keys key, ModKeys mods = ModKeys.None)
 		{
-			Input.KeyDown(key, (Input.ModKeys)mods);
+			Input.KeyDown(key, mods);
 		}
 		
 		/// <summary> 
@@ -646,7 +620,7 @@ namespace Automation
 		/// </summary>
 		public static void KeyUp(Keys key, ModKeys mods = ModKeys.None)
 		{
-			Input.KeyUp(key, (Input.ModKeys)mods);
+			Input.KeyUp(key, mods);
 		}		
 		#endregion
 

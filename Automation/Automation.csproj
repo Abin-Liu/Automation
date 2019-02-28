@@ -52,7 +52,6 @@
     <Compile Include="Libs\Win32API.GDI.cs" />
     <Compile Include="Libs\Win32API.Hotkey.cs" />
     <Compile Include="Libs\Win32API.Input.cs" />
-    <Compile Include="Libs\Win32API.MultiMedia.cs" />
     <Compile Include="Libs\Win32API.Window.cs" />
     <Compile Include="MemDC.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -61,6 +60,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="WoWAutomationThread.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx">
