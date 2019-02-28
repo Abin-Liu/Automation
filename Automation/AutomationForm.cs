@@ -126,7 +126,7 @@ namespace Automation
 		/// 用户按下了某个通过RegisterHotkey注册的热键
 		/// <param name="id">热键ID</param>
 		/// </summary>
-		protected virtual void OnHotkey(int id) { }
+		protected virtual void OnHotKey(int id) { }
 
 		/// <summary>
 		/// 接收到来自线程的消息
@@ -150,7 +150,7 @@ namespace Automation
 		/// <param name="modifiers">辅助键（Ctrl, Alt, Shift），可通过|混合多个辅助键</param>
 		/// <returns>注册成功返回true，否则返回false</returns>
 		/// </summary>
-		protected bool RegisterHotkey(int id, Keys key, int modifiers = 0)
+		protected bool RegisterHotKey(int id, Keys key, int modifiers = 0)
 		{
 			return Hotkey.RegisterHotKey(this.Handle, id, modifiers, key);
 		}
@@ -169,7 +169,7 @@ namespace Automation
 		/// </summary>
 		protected virtual void Form_OnLoad(object sender, EventArgs e)
 		{
-			if (!RegisterHotkey(WM_HOTKEY_PAUSE, Keys.Pause, Hotkey.MOD_NONE))
+			if (!RegisterHotKey(WM_HOTKEY_PAUSE, Keys.Pause, Hotkey.MOD_NONE))
 			{
 				Message("注册快捷键PAUSE失败，请先关闭占用此键的应用程序，然后重试。");
 			}
@@ -217,7 +217,7 @@ namespace Automation
 				}
 				else
 				{
-					OnHotkey(id); // other hotkey
+					OnHotKey(id); // other hotkey
 				}
 			}
 			else if (message == AutomationThread.THREAD_MSG_ID)

@@ -171,7 +171,14 @@ namespace Automation.Win32API
 		public static extern int SetCursorPos(int x, int y);
 
 		[DllImport("user32.dll")]
-		public static extern int GetCursorPos(out Point point);
+		static extern int GetCursorPos(out Point point);
+
+		public static Point GetCursorPos()
+		{
+			Point point = new Point(0, 0);
+			GetCursorPos(out point);
+			return point;
+		}
 
 		[DllImport("user32.dll")]
 		static extern int GetKeyboardState(byte[] states);

@@ -325,9 +325,7 @@ namespace Automation
 		/// </summary>
 		public Rectangle GetClientRect()
 		{
-			Rectangle rect = new Rectangle(0, 0, 0, 0);
-			Window.GetClientRect(TargetWnd, out rect);
-			return rect;
+			return Window.GetClientRect(TargetWnd);
 		}
 
 		/// <summary> 
@@ -353,7 +351,7 @@ namespace Automation
 		/// </summary>
 		public Point TranslateLocation(int x, int y)
 		{
-			return Window.ClientToScreen(TargetWnd, new Point(x, y));
+			return TranslateLocation(new Point(x, y));			
 		}
 
 		/// <summary> 
@@ -363,7 +361,9 @@ namespace Automation
 		/// </summary>
 		public Point TranslateLocation(Point point)
 		{
-			return Window.ClientToScreen(TargetWnd, point);
+			Point offset = Window.ClientToScreen(TargetWnd);
+			point.Offset(offset);
+			return point;
 		}
 		#endregion
 
