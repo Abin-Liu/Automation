@@ -138,7 +138,7 @@ namespace Automation
 			TargetWnd = Window.FindWindow(TargetWndClass, TargetWndName);
 			if (TargetWnd == IntPtr.Zero)
 			{
-				LastError = string.Format("目标窗口未找到：[{0}]。", TargetWndName == null ? "Class: " + TargetWndClass : TargetWndName);
+				LastError = string.Format("目标窗口未找到 - [{0}]。", TargetWndName == null ? "Class: " + TargetWndClass : TargetWndName);
 				return false;
 			}
 
@@ -318,7 +318,11 @@ namespace Automation
 			}
 			Window.SetForegroundWindow(TargetWnd);
 		}
-		
+
+		/// <summary> 
+		/// 获取目标窗口的客户端矩形，左上角始终为0,0
+		/// <returns>客户端矩形</returns>
+		/// </summary>
 		public Rectangle GetClientRect()
 		{
 			Rectangle rect = new Rectangle(0, 0, 0, 0);
@@ -533,24 +537,118 @@ namespace Automation
 		#endregion
 
 		#region 目标窗口键盘交互
-		public enum ModKeys { None = 0, Shift = 0x01, Control = 0x02, Alt = 0x04 }
 
-		public void KeyStroke(Keys key, ModKeys mods = ModKeys.None)
+		/// <summary> 
+		/// 定义辅助按键Shift, Control, Alt，可通过|操作符合并
+		/// </summary>
+		public enum ModKeys { None = 0, Shift = 0x01, Control = 0x02, Alt = 0x04 }		
+
+		/// <summary> 
+		/// 模拟键盘按键		
+		/// <param name="key">Keys值</param>
+		/// <param name="mods">辅助键</param>
+		/// </summary>
+		public static void KeyStroke(Keys key, ModKeys mods = ModKeys.None)
 		{
 			KeyDown(key, mods);			
 			KeyUp(key, mods);
 		}
 
-		public void KeyDown(Keys key, ModKeys mods = ModKeys.None)
+		/// <summary> 
+		/// 模拟键盘按键发送一个字符		
+		/// <param name="value">字符</param>
+		/// <param name="mods">辅助键</param>
+		/// </summary>
+		public static void SendChar(char value, ModKeys mods = ModKeys.None)
+		{
+			SendChar("" + value, mods);
+		}
+
+		/// <summary> 
+		/// 模拟键盘按键发送一个字符
+		/// <param name="name">字符名称</param>
+		/// <param name="mods">辅助键</param>
+		/// </summary>
+		public static void SendChar(string name, ModKeys mods = ModKeys.None)
+		{
+			switch (name)
+			{
+				case "\r":
+				case "\n":
+					name = "ENTER";
+					break;
+
+				case "\t":
+					name = "TAB";
+					break;
+
+				case "\b":
+					name = "BACKSPACE";
+					break;
+
+				case "\0":
+					name = "";
+					break;
+
+				case " ":
+					name = "";
+					KeyStroke(Keys.Space, mods); // SendKeys不支持空格
+					break;
+
+				default:
+					break;
+			}
+
+			if (String.IsNullOrEmpty(name))
+			{
+				return;
+			}			
+
+			name = "{" + name + "}";
+			if ((mods & ModKeys.Alt) != 0)
+			{
+				name = "%" + name;
+			}
+
+			if ((mods & ModKeys.Control) != 0)
+			{
+				name = "^" + name;
+			}
+
+			if ((mods & ModKeys.Shift) != 0)
+			{
+				name = "+" + name;
+			}
+
+			try
+			{
+				SendKeys.SendWait(name);
+			}
+			catch
+			{
+			}			
+		}
+
+		/// <summary> 
+		/// 模拟键盘按键被按下		
+		/// <param name="key">Keys值</param>
+		/// <param name="mods">辅助键</param>
+		/// </summary>
+		public static void KeyDown(Keys key, ModKeys mods = ModKeys.None)
 		{
 			Input.KeyDown(key, (Input.ModKeys)mods);
 		}
-
-		public void KeyUp(Keys key, ModKeys mods = ModKeys.None)
+		
+		/// <summary> 
+		/// 模拟键盘按键被松开		
+		/// <param name="key">Keys值</param>
+		/// <param name="mods">辅助键</param>
+		/// </summary>
+		public static void KeyUp(Keys key, ModKeys mods = ModKeys.None)
 		{
 			Input.KeyUp(key, (Input.ModKeys)mods);
-		}
-		#endregion		
+		}		
+		#endregion
 
 		#region IDisposable接口实现
 		/// <summary> 
@@ -615,6 +713,7 @@ namespace Automation
 
 		private void _OnStop()
 		{
+			m_ticker.Stop();
 			m_soundPlayerStop.Play();			
 			OnStop();
 			ReleaseDC();
