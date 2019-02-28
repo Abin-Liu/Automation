@@ -572,8 +572,7 @@ namespace Automation
 		public static void SendChar(string name, ModKeys mods = ModKeys.None)
 		{
 			switch (name)
-			{
-				case "\r":
+			{				
 				case "\n":
 					name = "ENTER";
 					break;
@@ -586,6 +585,7 @@ namespace Automation
 					name = "BACKSPACE";
 					break;
 
+				case "\r":
 				case "\0":
 					name = "";
 					break;

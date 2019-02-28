@@ -14,21 +14,22 @@ namespace Automation.DemoApp
 			TargetWndClass = "Notepad";
 		}
 
-		static readonly string CONTENTS = "Do not go gentle into that good night,\nOld age should burn and rave at close of day,\nRage, rage against the dying of the light.";		
-
 		protected override void ThreadProc()
-		{			
+		{
+			// 清空文本
 			KeyStroke(Keys.A, ModKeys.Control);
 			DelayBeforeAction(600);
 			KeyStroke(Keys.Back);
 			DelayBeforeAction(600);
 
-			foreach (char ch in CONTENTS)
+			// 输入文字，速率10字/秒
+			foreach (char ch in TEST_CONTENTS)
 			{
 				SendChar(ch);
 				DelayBeforeAction(100);				
 			}
 
+			// 点击保存按钮
 			DelayBeforeAction(500);
 			LeftClick(14, -13);
 			DelayBeforeAction(500);
@@ -36,5 +37,7 @@ namespace Automation.DemoApp
 			DelayBeforeAction(800);
 			LeftClick(96, 56);
 		}
+
+		private static readonly string TEST_CONTENTS = "Do not go gentle into that good night,\nOld age should burn and rave at close of day,\nRage, rage against the dying of the light.";
 	}
 }
