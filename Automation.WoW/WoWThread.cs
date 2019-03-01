@@ -2,13 +2,14 @@
 using System.Drawing;
 using System.Windows.Forms;
 using Automation.Win32API;
+using Automation.WoW.Libs;
 
-namespace Automation
+namespace Automation.WoW
 {
 	/// <summary>
 	/// 继承自AutomationThread的抽象线程类，封装了大部分与WoW窗口交互的通用方法和常量
 	/// </summary>
-	public abstract class WoWAutomationThread : AutomationThread
+	public abstract class WoWThread : AutomationThread
 	{
 		#region 常量定义
 		/// <summary>
@@ -62,7 +63,7 @@ namespace Automation
 		/// <summary>
 		/// 默认构造函数
 		/// </summary>
-		public WoWAutomationThread()
+		public WoWThread()
 		{
 			TargetWndClass = "GxWindowClass"; // WOW窗口类
 		}
@@ -191,6 +192,78 @@ namespace Automation
 		{
 			KeyStroke(Keys.Space);
 			m_lastAntiIdle = DateTime.Now;
+		}
+		#endregion
+
+		#region 插件相关
+		/// <summary>
+		/// 向WoW安装一个插件
+		/// <param name="name">插件名称</param>
+		/// <param name="sourcePath">插件源文件所在目录</param>
+		/// <returns>如果安装成功则返回true，否则返回false</returns>
+		/// </summary>
+		public static bool InstallAddOn(string name, string sourcePath = null)
+		{
+			AddonHelper addon = new AddonHelper();
+			if (!addon.Valid)
+			{
+				MessageBox.Show("无法从系统注册表获得WOW安装目录，请手动指定WOW安装目录（Wow.exe可执行文件所在目录）。", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+
+				while (true)
+				{
+					FolderBrowserDialog dialog = new FolderBrowserDialog();
+					dialog.ShowNewFolderButton = false;
+					dialog.ShowDialog();
+
+					if (AddonHelper.IsWowPath(dialog.SelectedPath))
+					{
+						addon.WowPath = dialog.SelectedPath;
+						addon.UpdateRegistryWowPath();
+						break;
+					}
+
+					DialogResult res = MessageBox.Show("\"" + dialog.SelectedPath + "\" 不是一个正确的WOW安装目录，请重新选择（Wow.exe可执行文件所在目录）。", Application.ProductName, MessageBoxButtons.RetryCancel);
+					if (res == DialogResult.Cancel)
+					{
+						break;
+					}
+				}
+			}
+
+			if (!addon.Valid)
+			{
+				MessageBox.Show("未能安装游戏内插件，" + Application.ProductName + "可能无法正常工作。", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+				return false;
+			}
+
+			addon.InstallAddOn(sourcePath, name);
+
+			if (Window.FindWindow("GxWindowClass", null) != IntPtr.Zero)
+			{
+				MessageBox.Show("安装程序检测到WOW正在运行中，你需要大退游戏才能使游戏内插件生效。", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+			}
+
+			return true;
+		}
+
+		/// <summary>
+		/// 卸载一个WoW插件
+		/// <param name="name">插件名称</param>
+		/// <returns>如果卸载成功则返回true，否则返回false</returns>
+		/// </summary>
+		public static bool UninstallAddOn(string name)
+		{
+			return new AddonHelper().UninstallAddOn(name);
+		}
+
+		/// <summary>
+		/// 检查某个WoW插件是否存在
+		/// <param name="name">插件名称</param>
+		/// <returns>如果插件存在则返回true，否则返回false</returns>
+		/// </summary>
+		public static bool AddOnExists(string name)
+		{
+			return new AddonHelper().AddOnExists(name);
 		}
 		#endregion
 

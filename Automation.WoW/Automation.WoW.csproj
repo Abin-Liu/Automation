@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{673FD433-C82C-4802-A348-4571641805D1}</ProjectGuid>
+    <ProjectGuid>{0820E41F-9E2E-4693-ABB8-A8C1522B7127}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Automation</RootNamespace>
-    <AssemblyName>Automation</AssemblyName>
+    <RootNamespace>Automation.WoW</RootNamespace>
+    <AssemblyName>Automation.WoW</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -29,10 +29,11 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Automation.xml</DocumentationFile>
-    <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Automation">
+      <HintPath>..\Automation\bin\Automation.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -44,38 +45,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AutomationForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AutomationThread.cs" />
-    <Compile Include="Libs\EventThread.cs" />
-    <Compile Include="Libs\Win32API.GDI.cs" />
-    <Compile Include="Libs\Win32API.Hotkey.cs" />
-    <Compile Include="Libs\Win32API.Input.cs" />
-    <Compile Include="Libs\Win32API.Window.cs" />
-    <Compile Include="MemDC.cs" />
+    <Compile Include="Libs\AddonHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup />
-  <ItemGroup>
-    <None Include="Sounds\Alert.wav" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Sounds\Start.wav" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Sounds\Stop.wav" />
+    <Compile Include="WoWThread.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

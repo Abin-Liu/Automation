@@ -5,8 +5,31 @@ using Automation.Win32API;
 
 namespace Automation
 {
-	public delegate int ScanPixelDelegate(int x, int y, int color, Object param); // 返回值0=Continue, 1=Success, 2=Abort
-	
+	/// <summary>
+	/// 像素扫描委托PixelScanDelegate的返回值： Continue=继续扫描, Success=结束扫描（标记成功）, Abort=结束扫描（标记失败）
+	/// </summary>
+	public enum PixelScanResults { Continue, Success, Abort };
+
+	/// <summary>
+	/// 像素扫描委托，每扫描一个像素都会被调用一次
+	/// <param name="x">当前像素x坐标</param>
+	/// <param name="y">当前像素y坐标</param>
+	/// <param name="color">当前像素RGB值</param>
+	/// <param name="param">自定义回调参数</param>
+	/// <returns>返回PixelScanResults.Continue继续扫描，返回PixelScanResults.Success结束扫描并标记成功，返回返回PixelScanResults.Abort结束扫描并标记失败</returns>
+	/// </summary>
+	public delegate PixelScanResults PixelScanDelegate(int x, int y, int color, Object param);
+
+	/// <summary>
+	/// 像素扫描方法MemDC.ScanPixels的返回数据
+	/// </summary>
+	public class PixelScanData
+	{
+		public int X { get; set; } = 0;
+		public int Y { get; set; } = 0;
+		public int Color { get; set; } = 0;
+	}
+
 	/// <summary>
 	/// GDI的GetPixel方法仅适用于单个像素访问，而在一块屏幕区域内高速扫描大量像素时
 	/// 会导致画面卡顿。MemDC为解决这个问题而设计，它可以从屏幕上复制一块区域到内存
@@ -101,11 +124,11 @@ namespace Automation
 		/// <summary> 
 		/// 扫描内存块中的像素RGB值
 		/// <param name="interlace">隔行值</param>
-		/// <param name="scanPixelCallback">回调函数</param>
+		/// <param name="pixelScanCallback">回调函数</param>
 		/// <param name="param">回调参数</param>
 		/// <returns>如果像素被找到返回一个PixelScanData对象，否则返回null</returns>
 		/// </summary>
-		public PixelScanData ScanPixels(int interlace, ScanPixelDelegate scanPixelCallback, Object param = null)
+		public PixelScanData ScanPixels(int interlace, PixelScanDelegate pixelScanCallback, Object param)
 		{
 			if (!Valid)
 			{
@@ -122,15 +145,15 @@ namespace Automation
 				for (int y = 0; y < Height; y += interlace)
 				{
 					int color = GetPixel(x, y);
-					int result = scanPixelCallback(x, y, color, param);
+					PixelScanResults result = pixelScanCallback(x, y, color, param);
 
-					if (result == PixelScanData.Abort)
+					if (result == PixelScanResults.Abort)
 					{
 						return null;
 					}
 
-					// pixel found
-					if (result == PixelScanData.Success)
+					// 像素符合
+					if (result == PixelScanResults.Success)
 					{
 						PixelScanData data = new PixelScanData();
 						data.X = x;
@@ -162,18 +185,5 @@ namespace Automation
 		private Bitmap m_bmp = null;
 		private Graphics m_graph = null;		
 		#endregion
-	}
-
-	/// <summary>
-	/// 用以储存MemDC.ScanPixels方法的扫描结果
-	/// </summary>
-	public class PixelScanData
-	{
-		public static readonly int Continue = 0;
-		public static readonly int Success = 1;
-		public static readonly int Abort = 2;
-		public int X { get; set; }
-		public int Y { get; set; }
-		public int Color { get; set; }
 	}
 }

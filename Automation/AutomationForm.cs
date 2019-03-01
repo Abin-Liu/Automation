@@ -22,18 +22,41 @@ namespace Automation
 		/// <summary>
 		/// 是否自动注册Pause键
 		/// </summary>
-		protected bool UsePauseKey { get; set; } = false;
+		public bool RegisterPauseKey { get; set; } = false;
+
+		/// <summary>
+		/// 是否注册Boss模式快捷键Ctrl-Alt-B
+		/// </summary>
+		public bool RegisterBossMode { get; set; } = false;
+
+		/// <summary>
+		/// Boss模式（隐藏目标窗口）
+		/// </summary>
+		public bool BossMode
+		{
+			get
+			{
+				return m_bossMode;
+			}
+
+			set
+			{
+				m_bossMode = value;
+				Window.ShowWindow(m_thread.TargetWnd, value ? Window.SW_HIDE : Window.SW_SHOW);
+				OnBossMode(value);				
+			}
+		}
 
 		/// <summary>
 		/// 是否隐藏主窗口
 		/// </summary>
-		protected bool HideForm { get; set; } = false;
+		public bool HideForm { get; set; } = false;
 
 		/// <summary>
 		/// 设置线程对象
 		/// <param name="thread">由继承类创建的线程对象</param> 
 		/// </summary>
-		protected virtual void SetThread(AutomationThread thread)
+		public virtual void SetThread(AutomationThread thread)
 		{
 			m_thread = thread;
 		}
@@ -154,6 +177,12 @@ namespace Automation
 		protected virtual void OnMessage(int message, IntPtr wParam, IntPtr lParam) { }
 
 		/// <summary>
+		/// Boss模式状态切换时调用
+		/// <param name="bossMode">当前是否处于boss模式</param>
+		/// </summary>
+		protected virtual void OnBossMode(bool bossMode) { }
+
+		/// <summary>
 		/// 注册一个热键，用户在任何场合按下此键，本窗口都会收到消息
 		/// <param name="id">热键ID</param>
 		/// <param name="key">键位</param>
@@ -185,9 +214,14 @@ namespace Automation
 				this.ShowInTaskbar = false;
 			}
 
-			if (UsePauseKey && !RegisterHotKey(WM_HOTKEY_PAUSE, Keys.Pause))
+			if (RegisterPauseKey && !RegisterHotKey(WM_HOTKEY_PAUSE, Keys.Pause))
 			{
 				Message("注册快捷键PAUSE失败，请先关闭占用此键的应用程序，然后重试。");
+			}
+
+			if (RegisterBossMode && !RegisterHotKey(WM_HOTKEY_BOSSMODE, Keys.B, ModKeys.Control | ModKeys.Alt))
+			{
+				Message("注册快捷键Ctrl-Alt-B失败，请先关闭占用此组合键的应用程序，然后重试。");
 			}
 		}
 
@@ -208,11 +242,16 @@ namespace Automation
 		/// </summary>
 		protected virtual void Form_OnClosed(object sender, FormClosedEventArgs e)
 		{
-			if (UsePauseKey)
+			if (RegisterPauseKey)
 			{
 				UnregisterHotKey(WM_HOTKEY_PAUSE);
 			}
-			
+
+			if (RegisterBossMode)
+			{
+				UnregisterHotKey(WM_HOTKEY_BOSSMODE);
+			}
+
 			m_thread.Stop();
 			m_thread.Alerting = false;
 			m_thread.Dispose();
@@ -234,6 +273,10 @@ namespace Automation
 				if (id == WM_HOTKEY_PAUSE)
 				{
 					ToggleThread();
+				}
+				else if (id == WM_HOTKEY_BOSSMODE)
+				{
+					BossMode = !BossMode;
 				}
 				else
 				{
@@ -266,7 +309,9 @@ namespace Automation
 
 		#region 私有成员
 		private static readonly int WM_HOTKEY_PAUSE = 9035; // Pause key id
+		private static readonly int WM_HOTKEY_BOSSMODE = 9036; // Boss mode key id
 		private AutomationThread m_thread = null;
+		private bool m_bossMode = false;
 
 		private static int IntPtrToInt(IntPtr p)
 		{
