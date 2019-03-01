@@ -60,7 +60,7 @@ namespace Automation.DemoApp
 		protected override void OnThreadStop()
 		{
 			base.OnThreadStop();
-			Message("线程结束。", MessageBoxIcon.Information);
+			Message("Thread stopped.", MessageBoxIcon.Information);
 			btnStart.Enabled = true;
 			btnStop.Enabled = false;			
 		}

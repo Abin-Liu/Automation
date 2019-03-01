@@ -16,20 +16,20 @@ namespace Automation.DemoApp
 
 		protected override void ThreadProc()
 		{
-			// 清空文本
+			// Clear texts
 			KeyStroke(Keys.A, ModKeys.Control);
 			DelayBeforeAction(600);
 			KeyStroke(Keys.Back);
 			DelayBeforeAction(600);
 
-			// 输入文字，速率10字/秒
+			// Input at 10 speed of 10 chars per second
 			foreach (char ch in TEST_CONTENTS)
 			{
 				SendChar(ch);
 				DelayBeforeAction(100);				
 			}
 
-			// 点击保存按钮
+			// Click the save menu
 			DelayBeforeAction(500);
 			MouseClick(14, -13);
 			DelayBeforeAction(500);

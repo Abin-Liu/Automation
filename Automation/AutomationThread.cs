@@ -7,43 +7,43 @@ using Automation.Win32API;
 namespace Automation
 {
 	/// <summary>
-	/// 负责与目标窗口进行互动的抽象线程类
+	/// The abstract thread class interact with the target window
 	/// </summary>
 	public abstract class AutomationThread : IDisposable
 	{
-		#region 公开属性
+		#region Public Properties
 		/// <summary>
-		/// 目标窗口名称，用以在线程启动时寻找目标窗口
+		/// Text of the target window
 		/// </summary>
 		public string TargetWndName { get; protected set; } = null;
 
 		/// <summary>
-		/// 目标窗口类名称，用以在线程启动时寻找目标窗口
+		/// Class name of the target window
 		/// </summary>
 		public string TargetWndClass { get; protected set; } = null;
 
 		/// <summary>
-		/// 目标窗口句柄，计算Client坐标偏移量的依据
+		/// Handle of the target window
 		/// </summary>
-		public IntPtr TargetWnd { get; private set; } = IntPtr.Zero;
+		public IntPtr TargetWnd { get; protected set; } = IntPtr.Zero;
 
 		/// <summary> 
-		/// Win32设备上下文指针，一旦使用结束必须尽快被释放
+		/// Win32 device context
 		/// </summary> 
 		public IntPtr DC { get; private set; } = IntPtr.Zero;
 
 		/// <summary> 
-		/// 检查此实例是否可以正常读取屏幕像素（拥有合法的设备上下文）
+		/// Whether the instance can read screen pixels
 		/// </summary> 
 		public bool Valid { get { return DC != IntPtr.Zero; } }
 
 		/// <summary> 
-		/// 线程设置error消息供主窗口调用
+		/// Thread error messages used by message window
 		/// </summary> 
-		public string LastError { get; protected set; }
+		public string LastError { get; protected set; } = null;
 
 		/// <summary> 
-		/// 使线程开始或停止响铃提醒
+		/// Start or stop sound alarm
 		/// </summary>
 		public bool Alerting
 		{
@@ -75,24 +75,24 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 检查线程是否运行中
+		/// Whether the thread is running
 		/// </summary> 
 		public bool IsAlive { get { return m_thread.IsAlive; } }
 
 		/// <summary> 
-		/// 检查线程是否由用户提前终止
+		/// Whether the thread was aborted by user
 		/// </summary> 
 		public bool Aborted { get { return m_thread.Aborted; } }
 
 		/// <summary> 
-		/// 暂停/继续监控线程
+		/// Pause or resume the thread
 		/// </summary> 
 		public bool Paused { get; set; } = false;
 		#endregion
 
-		#region 构造/析构函数
+		#region C'tors
 		/// <summary> 
-		/// 默认构造函数
+		/// Default constructor
 		/// </summary>
 		public AutomationThread()
 		{
@@ -104,7 +104,7 @@ namespace Automation
 		}
 
 		/// <summary> 
-		///析构函数
+		/// Destructor
 		/// </summary>
 		~AutomationThread()
 		{
@@ -112,40 +112,46 @@ namespace Automation
 		}
 		#endregion
 
-		#region 线程操作
+		#region Thread Operations
 		/// <summary> 
-		/// 启动线程
-		/// <param name="messageForm">接受线程消息的窗口，通常是程序主窗口</param>
-		/// <param name="tickInterval">监控线程tick间隔（毫秒），如果为0则不启动监控线程</param> 
+		/// Start the thread
+		/// <param name="messageForm">The window which receives thread messages, usually the main form</param>
+		/// <param name="tickInterval">Interval of the ticker, the ticker won't start if the parameter is 0</param> 
 		/// </summary>
 		public virtual bool Start(Form messageForm, int tickInterval = 1000)
 		{
 			if (IsAlive)
 			{
-				LastError = "线程已经在运行中。";
+				LastError = "Thread is already running.";
 				return false;
 			}
 
-			TargetWnd = IntPtr.Zero;
-
-			// 线程启动前必须先定位目标窗口
-			if (TargetWndClass == null && TargetWndName == null)
+			if (TargetWnd != IntPtr.Zero && !Window.IsWindow(TargetWnd))
 			{
-				LastError = "目标窗口名称或类名称均未定义。";
-				return false;
+				TargetWnd = IntPtr.Zero;
 			}
 
-			TargetWnd = Window.FindWindow(TargetWndClass, TargetWndName);
 			if (TargetWnd == IntPtr.Zero)
 			{
-				LastError = string.Format("目标窗口未找到 - [{0}]。", TargetWndName == null ? "Class: " + TargetWndClass : TargetWndName);
-				return false;
+				// The target window needs to be found before starts
+				if (TargetWndClass == null && TargetWndName == null)
+				{
+					LastError = "Information of target window is missing.";
+					return false;
+				}
+
+				TargetWnd = Window.FindWindow(TargetWndClass, TargetWndName);
+				if (TargetWnd == IntPtr.Zero)
+				{
+					LastError = string.Format("Target not found - [{0}]。", TargetWndName == null ? "Class: " + TargetWndClass : TargetWndName);
+					return false;
+				}
 			}
 
-			// 有可能继承类在PreStart()中需要用到DC，所以及早创建
+			// Inherited threads might need to use dc in their PreStart()
 			if (!CreateDC())
 			{
-				LastError = "创建DC失败。";
+				LastError = "Failed to create device context.";
 				return false;
 			}
 
@@ -161,7 +167,7 @@ namespace Automation
 			m_messageWnd = messageForm.Handle;
 			m_thread.Start();
 
-			// 同时启动监控线程
+			// Start the ticker
 			if (tickInterval > 0)
 			{
 				if (tickInterval < 100)
@@ -175,7 +181,7 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 终止线程
+		/// Stop the thread
 		/// </summary>
 		public virtual void Stop()
 		{
@@ -184,8 +190,8 @@ namespace Automation
 		}		
 		
 		/// <summary> 
-		/// 当前线程休眠
-		/// <param name="milliseconds">休眠毫秒数</param> 
+		/// Sleep the current thread
+		/// <param name="milliseconds">Milliseconds</param> 
 		/// </summary>
 		public void Sleep(int milliseconds)
 		{
@@ -193,8 +199,8 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 开始同步锁
-		/// <param name="obj">同步锁对象，null则以this为锁对象</param> 
+		/// Sync lock
+		/// <param name="obj">Object to lock, use this if null</param> 
 		/// </summary>
 		public void Lock(Object obj = null)
 		{
@@ -207,8 +213,8 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 解除同步锁
-		/// <param name="obj">同步锁对象, null则以this为锁对象</param> 
+		/// Sync unlock
+		/// <param name="obj">Object to unlock, use this if null</param> 
 		/// </summary>
 		public void Unlock(Object obj = null)
 		{
@@ -222,43 +228,43 @@ namespace Automation
 
 		#endregion
 
-		#region 可重载函数
+		#region Overrides
 		/// <summary> 
-		/// 在线程启动前进行一次回调检查
-		/// <returns>如果允许线程启动返回true，否则返回false</returns>
+		/// A callback checking before the thread starts
+		/// <returns>Return true to allow the thread to start, false otherwise.</returns>
 		/// </summary>
-		protected virtual bool PreStart() { return true; } // 开始前状态检查，返回true启动线程
+		protected virtual bool PreStart() { return true; }
 
 		/// <summary> 
-		/// 线程已启动
+		/// Thread started
 		/// </summary>
-		protected virtual void OnStart() {} // 线程开始
+		protected virtual void OnStart() {}
 
 		/// <summary> 
-		/// 线程已终止
+		/// Thread stopped
 		/// </summary>
-		protected virtual void OnStop()	{} // 线程结束	
+		protected virtual void OnStop()	{}	
 
 		/// <summary> 
-		/// 线程活动期间每隔0.2秒调用一次，除非必要否则不建议重载
+		/// Called periodically during the thread execution
 		/// </summary>
 		protected virtual void OnTick() {}
 
 		/// <summary> 
-		/// 线程工作函数，非abstract的继承类必须加载
+		/// Thread work
 		/// </summary>
 		protected abstract void ThreadProc();
 		#endregion
 
-		#region 消息接受窗口交互
+		#region Message Window Interactions
 		public static readonly int THREAD_MSG_ID = Window.WM_APP + 3317;
 		public static readonly int THREAD_MSG_START = 16677923;
 		public static readonly int THREAD_MSG_STOP = 16677924;
 
 		/// <summary> 
-		/// 向线程消息接受窗口发送一个消息
-		/// <param name="wParam">Win32消息约定参数WParam</param> 
-		/// <param name="lParam">Win32消息约定参数LParam</param> 		/// 
+		/// Send a message to the message window
+		/// <param name="wParam">wParam</param> 
+		/// <param name="lParam">lParam</param> 		/// 
 		/// </summary>
 		protected void PostMessage(int wParam, int lParam)
 		{
@@ -269,27 +275,11 @@ namespace Automation
 		}
 		#endregion
 
-		#region 目标窗口常用操作
-		/// <summary> 
-		/// 为线程设置目标窗口
-		/// <param name="windowName">窗口标题</param> 
-		/// <param name="windowClass">窗口类名</param> 
-		/// <returns>如果窗口存在返回true，否则返回false</returns>
-		/// </summary>
-		public virtual bool SetTargetWnd(string windowName, string windowClass = null)
-		{
-			IntPtr targetWnd = IntPtr.Zero;
-			if (windowName != null || windowClass != null)
-			{
-				targetWnd = Window.FindWindow(windowClass, windowName);
-			}
-			TargetWnd = targetWnd;
-			return targetWnd != IntPtr.Zero;
-		}		
+		#region Target Window  Interactions
 
 		/// <summary> 
-		/// 检测目标窗口是否为当前活动窗口
-		/// <returns>如果目标窗口为当前活动窗口返回true，否则返回false</returns>
+		/// Whether the target window is foreground
+		/// <returns>Return true if the target window is foreground, false otherwise</returns>
 		/// </summary>
 		public bool IsTargetWndForeground()
 		{
@@ -302,7 +292,7 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 将目标窗口设置为当前活动窗口		
+		/// Set the target window foreground		
 		/// </summary>
 		public void SetTargetWndForeground()
 		{
@@ -314,14 +304,14 @@ namespace Automation
 			Window.ShowWindow(TargetWnd, Window.SW_SHOW);
 			if (Window.IsIconic(TargetWnd))
 			{
-				Window.ShowWindow(TargetWnd, Window.SW_RESTORE); // 如果最小化先恢复
+				Window.ShowWindow(TargetWnd, Window.SW_RESTORE);
 			}
 			Window.SetForegroundWindow(TargetWnd);
 		}
 
 		/// <summary> 
-		/// 获取目标窗口的客户端矩形，左上角始终为0,0
-		/// <returns>客户端矩形</returns>
+		/// Retreive client rectangle of the target window, top-left is always 0,0
+		/// <returns>Client rectangle</returns>
 		/// </summary>
 		public Rectangle GetClientRect()
 		{
@@ -329,8 +319,8 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 发送执行某个操作前先延迟一段时间以确保稳定性，同时检查线程Pause状态
-		/// <param name="milliseconds">延迟毫秒数</param> 
+		/// Apply a delay before sending an action for stablity, also check for thread pause status.
+		/// <param name="milliseconds">Delay in milliseconds</param> 
 		/// </summary>
 		public void DelayBeforeAction(int milliseconds = 500)
 		{
@@ -342,12 +332,12 @@ namespace Automation
 		}
 		#endregion
 
-		#region 目标窗口坐标位置换算
+		#region Target Window Coordinates Translation
 		/// <summary> 
-		/// 将目标窗口的客户端坐标转换为屏幕坐标
-		/// <param name="x">客户端坐标x</param> 
-		/// <param name="y">客户端坐标y</param> 
-		/// <returns>屏幕坐标</returns>
+		/// Client coords to screen coords
+		/// <param name="x">Client x coords</param> 
+		/// <param name="y">Client y coords</param> 
+		/// <returns>Screen coords</returns>
 		/// </summary>
 		public Point TranslateLocation(int x, int y)
 		{
@@ -355,9 +345,9 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 将目标窗口的客户端坐标转换为屏幕坐标
-		/// <param name="point">客户端坐标</param> 
-		/// <returns>屏幕坐标</returns>
+		/// Client coords to screen coords
+		/// <param name="point">Client coords</param> 
+		/// <returns>Screen coords</returns>
 		/// </summary>
 		public Point TranslateLocation(Point point)
 		{
@@ -367,12 +357,12 @@ namespace Automation
 		}
 		#endregion
 
-		#region 目标窗口像素RGB值获取
+		#region Target Window Pixel Access
 		/// <summary> 
-		/// 获取目标窗口客户端指定坐标位置的像素RGB值
-		/// <param name="x">客户端坐标x</param> 
-		/// <param name="y">客户端坐标y</param> 
-		/// <returns>RGB值</returns>
+		/// Retrieve a pixel of the target window
+		/// <param name="x">Client x coords</param> 
+		/// <param name="y">Client y coords</param> 
+		/// <returns>RGB value</returns>
 		/// </summary>
 		public int GetPixel(int x, int y)
 		{
@@ -381,13 +371,13 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 检查目标窗口客户端指定坐标位置的像素RGB值是否符合输入值
-		/// <param name="x">客户端坐标x</param> 
-		/// <param name="y">客户端坐标y</param> 
-		/// <param name="r">像素R值</param> 
-		/// <param name="g">像素G值</param> 
-		/// <param name="b">像素B值</param> 
-		/// <returns>如果客户端指定坐标像素RGB值符合输入值则返回true，否则返回false</returns>
+		/// Check whether a pixel of the target window matches specified RGB values
+		/// <param name="x">Client x coords</param> 
+		/// <param name="y">Client Y coords</param> 
+		/// <param name="r">R Value</param> 
+		/// <param name="g">G Value</param> 
+		/// <param name="b">B Value</param> 
+		/// <returns>Return true if the pixel matches, false otherwise.</returns>
 		/// </summary>
 		public bool CheckPixel(int x, int y, byte r, byte g, byte b)
 		{
@@ -395,14 +385,14 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 持续检查目标窗口客户端指定坐标位置的像素RGB值是否符合输入值
-		/// <param name="x">客户端坐标x</param> 
-		/// <param name="y">客户端坐标y</param> 
-		/// <param name="r">像素R值</param> 
-		/// <param name="g">像素G值</param> 
-		/// <param name="b">像素B值</param> 
-		/// <param name="timeout">最大检查时间（毫秒），0为永不超时</param>
-		/// <returns>如果在timeout规定时间之内检查到客户端指定坐标像素RGB值符合输入值则返回true，否则返回false</returns>
+		/// Keeps checking whether a pixel of the target window matches specified RGB values
+		/// <param name="x">Client x coords</param> 
+		/// <param name="y">Client Y coords</param> 
+		/// <param name="r">R component</param> 
+		/// <param name="g">G component</param> 
+		/// <param name="b">B component</param> 
+		/// <param name="timeout">Maximum milliseconds before timeout, 0 to check infinitely</param>
+		/// <returns>Return true if the pixel matches before timeout, false otherwise</returns>
 		/// </summary>
 		public bool WaitForPixel(int x, int y, byte r, byte g, byte b, int timeout = 0)
 		{
@@ -420,11 +410,11 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 合成RGB值
-		/// <param name="r">R值部分</param> 
-		/// <param name="g">G值部分</param> 
-		/// <param name="b">B值部分</param>
-		/// <returns>合成的RGB值</returns>
+		/// Compose a RGB value
+		/// <param name="r">R component</param> 
+		/// <param name="g">G component</param> 
+		/// <param name="b">B component</param>
+		/// <returns>RGB value.</returns>
 		/// </summary>
 		public static int RGB(byte r, byte g, byte b)
 		{
@@ -432,9 +422,9 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 提取RGB值中的R值部分		
-		/// <param name="color">RGB值</param>
-		/// <returns>R值部分</returns>
+		/// Extract R component from an RGB value		
+		/// <param name="color">RGB value</param>
+		/// <returns>R component</returns>
 		/// </summary>
 		public static byte GetRValue(int color)
 		{
@@ -442,9 +432,9 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 提取RGB值中的G值部分		
-		/// <param name="color">RGB值</param>
-		/// <returns>G值部分</returns>
+		/// Extract G component from an RGB value		
+		/// <param name="color">RGB value</param>
+		/// <returns>G component</returns>
 		/// </summary>
 		public static byte GetGValue(int color)
 		{
@@ -452,9 +442,9 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 提取RGB值中的B值部分		
-		/// <param name="color">RGB值</param>
-		/// <returns>B值部分</returns>
+		/// Extract B component from an RGB value		
+		/// <param name="color">RGB value</param>
+		/// <returns>B component</returns>
 		/// </summary>
 		public static byte GetBValue(int color)
 		{
@@ -463,12 +453,12 @@ namespace Automation
 
 		#endregion
 
-		#region 目标窗口鼠标交互
+		#region Target Window Mouse Interactions
 		/// <summary> 
-		/// 在目标窗口客户端指定坐标位置点击鼠标键
-		/// <param name="x">客户端坐标x</param> 
-		/// <param name="y">客户端坐标y</param> 
-		/// <param name="button">鼠标按键</param> 
+		/// Click a mouse button inside the target window's client area
+		/// <param name="x">Client x coords</param> 
+		/// <param name="y">Client y coords</param> 
+		/// <param name="button">Mouse button</param> 
 		/// </summary>
 		public void MouseClick(int x, int y, MouseButtons button = MouseButtons.Left)
 		{
@@ -477,9 +467,9 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 将鼠标移动到目标窗口客户端指定坐标位置
-		/// <param name="x">客户端坐标x</param> 
-		/// <param name="y">客户端坐标y</param> 
+		/// Move the cursor to the target window's client area
+		/// <param name="x">Client x coords</param> 
+		/// <param name="y">Client y coords</param> 
 		/// </summary>
 		public void MouseMove(int x, int y)
 		{
@@ -488,8 +478,8 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 模拟鼠标键被按下
-		/// <param name="button">鼠标按键</param> 
+		/// Press down a mouse button
+		/// <param name="button">Mouse button</param> 
 		/// </summary>
 		public static void MouseDown(MouseButtons button = MouseButtons.Left)
 		{
@@ -497,8 +487,8 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 模拟鼠标键被松开
-		/// <param name="button">鼠标按键</param> 
+		/// Release a mouse button
+		/// <param name="button">Mouse button</param> 
 		/// </summary>
 		public static void MouseUp(MouseButtons button = MouseButtons.Left)
 		{
@@ -506,8 +496,8 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 模拟鼠标滚轮被转动
-		/// <param name="scrollUp">滚轮转动方向</param> 
+		/// Scroll the mouse wheel
+		/// <param name="scrollUp">Wheel direction</param> 
 		/// </summary>
 		public static void MouseWheel(bool scrollUp)
 		{
@@ -515,12 +505,12 @@ namespace Automation
 		}
 		#endregion
 
-		#region 目标窗口键盘交互
+		#region Target Window Keyboard Interactions
 
 		/// <summary> 
-		/// 模拟键盘按键		
-		/// <param name="key">Keys值</param>
-		/// <param name="mods">辅助键</param>
+		/// Send a keystroke	
+		/// <param name="key">Keys value</param>
+		/// <param name="mods">Modifiers</param>
 		/// </summary>
 		public static void KeyStroke(Keys key, ModKeys mods = ModKeys.None)
 		{
@@ -529,9 +519,9 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 模拟键盘按键发送一个字符		
-		/// <param name="value">字符</param>
-		/// <param name="mods">辅助键</param>
+		/// Send a character		
+		/// <param name="value">Character value</param>
+		/// <param name="mods">Modifiers</param>
 		/// </summary>
 		public static void SendChar(char value, ModKeys mods = ModKeys.None)
 		{
@@ -539,9 +529,9 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 模拟键盘按键发送一个字符
-		/// <param name="name">字符名称</param>
-		/// <param name="mods">辅助键</param>
+		/// Send a character
+		/// <param name="name">Character name</param>
+		/// <param name="mods">Modifiers</param>
 		/// </summary>
 		public static void SendChar(string name, ModKeys mods = ModKeys.None)
 		{
@@ -566,7 +556,7 @@ namespace Automation
 
 				case " ":
 					name = "";
-					KeyStroke(Keys.Space, mods); // SendKeys不支持空格
+					KeyStroke(Keys.Space, mods); // SendKeys does not support {Space}
 					break;
 
 				default:
@@ -604,19 +594,19 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 模拟键盘按键被按下		
-		/// <param name="key">Keys值</param>
-		/// <param name="mods">辅助键</param>
+		/// Press a key		
+		/// <param name="key">Keys value</param>
+		/// <param name="mods">Modifiers</param>
 		/// </summary>
 		public static void KeyDown(Keys key, ModKeys mods = ModKeys.None)
 		{
 			Input.KeyDown(key, mods);
 		}
-		
+
 		/// <summary> 
-		/// 模拟键盘按键被松开		
-		/// <param name="key">Keys值</param>
-		/// <param name="mods">辅助键</param>
+		/// Release a key		
+		/// <param name="key">Keys value</param>
+		/// <param name="mods">Modifiers</param>
 		/// </summary>
 		public static void KeyUp(Keys key, ModKeys mods = ModKeys.None)
 		{
@@ -624,9 +614,9 @@ namespace Automation
 		}		
 		#endregion
 
-		#region IDisposable接口实现
+		#region IDisposable Interface Implememtation
 		/// <summary> 
-		/// 由外部调用，销毁对象
+		/// Dispose the object
 		/// </summary>
 		public virtual void Dispose()
 		{
@@ -635,7 +625,7 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 用于释放非托管资源
+		/// Release unmanaged resources such as device context
 		/// </summary>
 		protected virtual void Dispose(bool disposing)
 		{
@@ -657,10 +647,10 @@ namespace Automation
 		}
 		#endregion
 
-		#region 私有成员
+		#region Private Members
 		private EventThread m_thread = new EventThread(true);
 		private TickThread m_ticker = new TickThread();
-		private bool m_alerting = false; // 是否正在响铃报警
+		private bool m_alerting = false; // Sound alarm on?
 		private IntPtr m_messageWnd = IntPtr.Zero;
 		private SoundPlayer m_soundPlayerStart = new SoundPlayer(Resources.ResourceManager.GetStream("Start"));
 		private SoundPlayer m_soundPlayerStop = new SoundPlayer(Resources.ResourceManager.GetStream("Stop"));
@@ -682,7 +672,7 @@ namespace Automation
 			}
 
 			OnStart();
-			PostMessage(THREAD_MSG_START, 0); // 通知线程消息接受窗口
+			PostMessage(THREAD_MSG_START, 0);
 		}
 
 		private void _OnStop()
@@ -691,7 +681,7 @@ namespace Automation
 			m_soundPlayerStop.Play();			
 			OnStop();
 			ReleaseDC();
-			PostMessage(THREAD_MSG_STOP, 0); // 通知线程消息接受窗口
+			PostMessage(THREAD_MSG_STOP, 0);
 		}
 
 		private void _ThreadProc()
@@ -699,7 +689,7 @@ namespace Automation
 			ThreadProc();
 		}
 
-		// 周期性检查目标窗口状态
+		// Check status of the target window periodically
 		private void _OnTick()
 		{
 			if (TargetWnd == IntPtr.Zero || _NeedPauseThreads())
@@ -707,14 +697,14 @@ namespace Automation
 				return;
 			}
 
-			// 目标窗口已关闭或被隐藏，直接终止线程
+			// The target window is closed or hidden, stop the thread
 			if (!Window.IsWindow(TargetWnd) || !Window.IsWindowVisible(TargetWnd))
 			{
 				Stop();
 				return;
 			}
 
-			// 确保目标窗口在最前台，但允许消息接收窗口在前台（用户正在操作GUI）
+			// Make sure the target window is foreground, but allow the message window
 			IntPtr foregroundWnd = Window.GetForegroundWindow();
 			if (foregroundWnd != TargetWnd && foregroundWnd != m_messageWnd)
 			{
@@ -725,8 +715,8 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 创建设备上下文
-		/// <returns>创建成功返回true，否则返回false</returns>
+		/// Create device context
+		/// <returns>Return true is success, false otherwise</returns>
 		/// </summary>
 		private bool CreateDC()
 		{
@@ -736,13 +726,13 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// 释放设备上下文（非常重要），Windows不会主动释放GDI非托管资源		
+		/// Release device context, very important!		
 		/// </summary>
 		private void ReleaseDC()
 		{
 			if (DC != IntPtr.Zero)
 			{
-				GDI.ReleaseDC(IntPtr.Zero, DC); // 释放GDI资源
+				GDI.ReleaseDC(IntPtr.Zero, DC);
 				DC = IntPtr.Zero;
 			}
 		}

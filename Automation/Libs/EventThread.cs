@@ -3,9 +3,9 @@ using System.Threading;
 
 namespace Automation
 {
-	delegate void EventThreadHandler();
+	public delegate void EventThreadHandler();
 
-	class EventThread : IDisposable
+	public class EventThread : IDisposable
 	{
 		public EventThreadHandler OnStart { get; set; } // Called when the thread starts
 		public EventThreadHandler OnStop { get; set; } // Called when the thread is stopped
