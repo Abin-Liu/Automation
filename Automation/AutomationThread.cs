@@ -394,7 +394,7 @@ namespace Automation
 		/// <param name="timeout">Maximum milliseconds before timeout, 0 to check infinitely</param>
 		/// <returns>Return true if the pixel matches before timeout, false otherwise</returns>
 		/// </summary>
-		public bool WaitForPixel(int x, int y, byte r, byte g, byte b, int timeout = 0)
+		public bool WaitForPixel(int x, int y, byte r, byte g, byte b, int timeout)
 		{
 			DateTime start = DateTime.Now;
 			while (!CheckPixel(x, y, r, g, b))

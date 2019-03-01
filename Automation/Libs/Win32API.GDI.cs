@@ -16,7 +16,11 @@ namespace Automation.Win32API
 
 		public static int GetPixel(IntPtr hdc, int x, int y)
 		{
-			int color = Win32GetPixel(hdc, x, y);			
+			int color = Win32GetPixel(hdc, x, y);
+			if (color == -1) // CLR_INVALID 0xffffffff
+			{
+				return -1;
+			}
 
 			// RGB components from win32 GetPixel are reversed from C# .net System.Drawing.Color
 			byte r = GetRValue(color);

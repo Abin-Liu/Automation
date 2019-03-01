@@ -119,6 +119,11 @@ namespace Automation
 			}
 
 			Color color = m_bmp.GetPixel(x, y);
+			if (color.ToArgb() == -1)
+			{
+				return -1;
+			}
+
 			return GDI.RGB(color.R, color.G, color.B);
 		}
 
