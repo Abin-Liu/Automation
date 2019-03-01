@@ -129,9 +129,9 @@ namespace Automation
 		private bool m_background = false;
 		private Thread m_thread = null;
 		private bool m_disposed = false;
-	}	
+	}
 
-	class TickThread : EventThread
+	public class TickThread : EventThread
 	{
 		public EventThreadHandler OnTick { get; set; } // Called on every tick 
 		public int Interval { get; private set; } = 100;
