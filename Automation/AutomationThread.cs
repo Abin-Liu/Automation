@@ -100,7 +100,7 @@ namespace Automation
 			m_thread.OnStop = _OnStop;
 			m_thread.ThreadProc = _ThreadProc;
 			m_ticker.OnTick = _OnTick;
-			
+			OnLocalize();
 		}
 
 		/// <summary> 
@@ -122,7 +122,7 @@ namespace Automation
 		{
 			if (IsAlive)
 			{
-				LastError = "Thread is already running.";
+				LastError = Localize("Thread is already running.");
 				return false;
 			}
 
@@ -136,14 +136,14 @@ namespace Automation
 				// The target window needs to be found before starts
 				if (TargetWndClass == null && TargetWndName == null)
 				{
-					LastError = "Information of target window is missing.";
+					LastError = Localize("Neither window text nor class name is specified for target window.");
 					return false;
 				}
 
 				TargetWnd = Window.FindWindow(TargetWndClass, TargetWndName);
 				if (TargetWnd == IntPtr.Zero)
 				{
-					LastError = string.Format("Target not found - [{0}]。", TargetWndName == null ? "Class: " + TargetWndClass : TargetWndName);
+					LastError = Localize("Target window not found - ") + (TargetWndName == null ? TargetWndClass : TargetWndName);
 					return false;
 				}
 			}
@@ -254,6 +254,23 @@ namespace Automation
 		/// Thread work
 		/// </summary>
 		protected abstract void ThreadProc();
+
+		protected virtual void OnLocalize()
+		{
+			Locale locale;
+
+			locale = RegisterLocale("zh-CN");
+			locale["Thread is already running."] = "线程已经在运行中。";
+			locale["Neither window text nor class name is specified for target window."] = "目标窗口的名称与类名均未定义。";
+			locale["Target window not found - "] = "目标窗口未找到 - ";
+			locale["Failed to create device context. "] = "创建DC失败。";
+
+			locale = RegisterLocale("zh-TW");
+			locale["Thread is already running."] = "線程已經在運行中。";
+			locale["Neither window text nor class name is specified for target window."] = "目標窗體的名稱與類名均未定義。";
+			locale["Target window not found - "] = "目標窗體未找到 - ";
+			locale["Failed to create device context. "] = "創建DC失敗。";
+		}
 		#endregion
 
 		#region Message Window Interactions
@@ -453,6 +470,18 @@ namespace Automation
 
 		#endregion
 
+		#region Localizations
+		public Locale RegisterLocale(string name)
+		{
+			return m_locales.RegisterLocale(name);
+		}
+
+		public string Localize(string key)
+		{
+			return m_locales.GetLocalizedString(key);
+		}
+		#endregion
+
 		#region Target Window Mouse Interactions
 		/// <summary> 
 		/// Click a mouse button inside the target window's client area
@@ -648,6 +677,7 @@ namespace Automation
 		#endregion
 
 		#region Private Members
+		private LocaleCollection m_locales = new LocaleCollection();
 		private EventThread m_thread = new EventThread(true);
 		private TickThread m_ticker = new TickThread();
 		private bool m_alerting = false; // Sound alarm on?
