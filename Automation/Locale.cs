@@ -63,16 +63,29 @@ namespace Automation
 		}
 
 		// the underlying dictonary
-		private Dictionary<string, string> m_map = new Dictionary<string, string>();
+		private Dictionary<string, string> m_map = new Dictionary<string, string>();		
 	}
 
 	public sealed class LocaleCollection
 	{
 
 		/// <summary>
-		/// Get system locale: en, zh-CN, zh-TW, etc
+		/// Get system locale: en-US, zh-CN, zh-TW, etc
 		/// </summary>
-		public static string SystemLocale { get; } = System.Globalization.CultureInfo.InstalledUICulture.Name;		
+		public static string SystemLocale { get; } = System.Globalization.CultureInfo.InstalledUICulture.Name;
+
+		public LocaleCollection()
+		{
+			Locale locale;
+
+			locale = new Locale();
+			m_map.Add("zh-CN", locale);
+			m_map.Add("zh-CHS", locale);
+
+			locale = new Locale();
+			m_map.Add("zh-TW", locale);
+			m_map.Add("zh-CHT", locale);
+		}
 
 		/// <summary>
 		/// Register a locale if not exists
@@ -81,7 +94,7 @@ namespace Automation
 		/// </summary>
 		public Locale RegisterLocale(string name)
 		{
-			if (string.IsNullOrEmpty(name) || name == "en")
+			if (string.IsNullOrEmpty(name) || name == LOCALE_DEFAULT)
 			{
 				return null;
 			}
@@ -104,7 +117,7 @@ namespace Automation
 		/// </summary>
 		public string GetLocalizedString(string key)
 		{
-			if (SystemLocale == "en")
+			if (SystemLocale == LOCALE_DEFAULT)
 			{
 				return key;
 			}
@@ -120,5 +133,6 @@ namespace Automation
 
 		// the underlying dictonary
 		private Dictionary<string, Locale> m_map = new Dictionary<string, Locale>();
+		private static readonly string LOCALE_DEFAULT = "en-US";
 	}
 }
