@@ -42,11 +42,107 @@ namespace Automation
 		/// <summary>
 		/// Checks whether the region is valid
 		/// </summary>
-		public bool Valid { get { return Width > 0 && Height > 0; } }
-		public int Left { get; private set; } = 0;
-		public int Top { get; private set; } = 0;
+		public bool Valid { get { return m_graph != null; } }
+		public int X { get; private set; } = 0;
+		public int Y { get; private set; } = 0;
 		public int Width { get; private set; } = 0;
 		public int Height { get; private set; } = 0;
+		#endregion
+
+		#region C'tors
+		/// <summary>
+		/// Default constructor
+		/// </summary>
+		public MemDC()
+		{
+		}
+
+		/// <summary>
+		/// Constructor with a Rectangle struct
+		/// <param name="boundary">The boundary of dc.</param>
+		/// </summary>
+		public MemDC(Rectangle boundary)
+		{
+			SetBoundary(boundary);
+		}
+
+		/// <summary>
+		/// Constructor with a Rectangle boundary
+		/// <param name="x">X coords of top-left corner of boundary.</param>
+		/// <param name="y">Y coords of top-left corner of boundary.</param>
+		/// <param name="width">Width of boundary.</param>
+		/// <param name="height">Height of boundary.</param>
+		/// </summary>
+		public MemDC(int x, int y, int width, int height)
+		{
+			SetBoundary(x, y, width, height);
+		}
+
+		/// <summary>
+		/// Specify the boundary rectangle
+		/// <param name="boundary">The boundary of dc.</param>
+		/// </summary>
+		public void SetBoundary(Rectangle boundary)
+		{
+			SetBoundary(boundary.Left, boundary.Top, boundary.Width, boundary.Height);
+		}
+		#endregion
+
+		#region Boundary specification
+		/// <summary>
+		/// Specify the boundary rectangle
+		/// <param name="x">X coords of top-left corner of boundary.</param>
+		/// <param name="y">Y coords of top-left corner of boundary.</param>
+		/// <param name="width">Width of boundary.</param>
+		/// <param name="height">Height of boundary.</param>
+		/// </summary>
+		public void SetBoundary(int x, int y, int width, int height)
+		{
+			int origWidth = Width;
+			int origHeight = Height;
+
+			X = x;
+			Y = y;
+			Width = Math.Max(width, 0);
+			Height = Math.Max(height, 0);
+
+			if (origWidth == Width && origHeight == Height)
+			{
+				return;
+			}
+
+			if (Width > 0 && Height > 0)
+			{
+				m_bmp = new Bitmap(Width, Height);
+				m_graph = Graphics.FromImage(m_bmp);
+			}
+			else
+			{
+				m_graph = null;
+				m_bmp = null;
+			}			
+		}
+
+		/// <summary>
+		/// Offset the boundary
+		/// <param name="x">X coords.</param>
+		/// <param name="y">Y coords.</param>		
+		/// </summary>
+		public void Offset(int x, int y)
+		{
+			X += x;
+			Y += y;
+		}
+
+		/// <summary>
+		/// Offset the boundary
+		/// <param name="offset">Values to offset.</param>
+		/// </summary>
+		public void Offset(Point offset)
+		{
+			X += offset.X;
+			Y += offset.Y;
+		}
 		#endregion
 
 		#region Region operations
@@ -56,53 +152,13 @@ namespace Automation
 		/// </summary>
 		public bool Fetch()
 		{
-			if (Width < 1 || Height < 1)
+			if (m_graph == null)
 			{
 				return false;
 			}
 
-			m_graph.CopyFromScreen(Left, Top, 0, 0, new Size(Width, Height));
+			m_graph.CopyFromScreen(X, Y, 0, 0, new Size(Width, Height));
 			return true;
-		}
-
-		/// <summary> 
-		/// Fetch the region from screen.
-		/// <param name="rect">Screen bundary of the region to be fetched.</param>
-		/// <returns>Return true if success, false otherwise.</returns>
-		/// </summary>
-		public bool Fetch(Rectangle rect)
-		{			
-			return Fetch(rect.X, rect.Y, rect.Width, rect.Height);
-		}
-
-		/// <summary> 
-		/// Fetch the region from screen.
-		/// <param name="x">X coords of screen.</param>
-		/// <param name="y">Y coords of screen.</param>
-		/// <param name="width">Width of the region.</param>
-		/// <param name="height">Height of the region.</param>
-		/// <returns>Return true if success, false otherwise.</returns>
-		/// </summary>
-		public bool Fetch(int x, int y, int width, int height)
-		{
-			if (width < 1 || height < 1)
-			{
-				return false;
-			}
-
-			Left = Math.Max(x, 0);
-			Top = Math.Max(y, 0);
-
-			// Recreate bitmap only if width or height changes.
-			if (width != Width || height != Height)
-			{
-				Width = width;
-				Height = height;
-				m_bmp = new Bitmap(width, height);
-				m_graph = Graphics.FromImage(m_bmp);
-			}
-
-			return Fetch();
 		}
 
 		/// <summary> 
@@ -134,7 +190,7 @@ namespace Automation
 		/// <param name="param">Callback parameter.</param>
 		/// <returns>Return a PixelScanData object if success, null otherwise.</returns>
 		/// </summary>
-		public PixelScanData ScanPixels(int interlace, PixelScanDelegate pixelScanCallback, Object param)
+		public PixelScanData ScanPixels(int interlace, PixelScanDelegate pixelScanCallback, Object param = null)
 		{
 			if (!Valid)
 			{
@@ -189,7 +245,7 @@ namespace Automation
 
 		#region Private Members
 		private Bitmap m_bmp = null;
-		private Graphics m_graph = null;		
+		private Graphics m_graph = null;
 		#endregion
 	}
 }

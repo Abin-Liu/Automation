@@ -38,6 +38,21 @@ namespace Automation
 		public bool Valid { get { return DC != IntPtr.Zero; } }
 
 		/// <summary> 
+		/// Client rectangle of the target window, top-left is always 0,0
+		/// </summary>
+		public Rectangle ClientRect { get { return Window.GetClientRect(TargetWnd); } }
+
+		/// <summary> 
+		/// Win32 ClientToScreen offset
+		/// </summary>
+		public Point ClientToScreen { get { return Window.ClientToScreen(TargetWnd); } }
+
+		/// <summary> 
+		/// Win32 ScreenToClient offset
+		/// </summary>
+		public Point ScreenToClient { get { return Window.ScreenToClient(TargetWnd); } }
+
+		/// <summary> 
 		/// Thread error messages used by message window
 		/// </summary> 
 		public string LastError { get; protected set; } = null;
@@ -310,15 +325,6 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// Retreive client rectangle of the target window, top-left is always 0,0
-		/// <returns>Client rectangle</returns>
-		/// </summary>
-		public Rectangle GetClientRect()
-		{
-			return Window.GetClientRect(TargetWnd);
-		}
-
-		/// <summary> 
 		/// Apply a delay before sending an action for stablity, also check for thread pause status.
 		/// <param name="milliseconds">Delay in milliseconds</param> 
 		/// </summary>
@@ -371,17 +377,26 @@ namespace Automation
 		}
 
 		/// <summary> 
-		/// Check whether a pixel of the target window matches specified RGB values
+		/// Keeps checking whether a pixel of the target window matches specified RGB values
 		/// <param name="x">Client x coords</param> 
 		/// <param name="y">Client Y coords</param> 
-		/// <param name="r">R Value</param> 
-		/// <param name="g">G Value</param> 
-		/// <param name="b">B Value</param> 
-		/// <returns>Return true if the pixel matches, false otherwise.</returns>
+		/// <param name="color">The RGB value</param> 
+		/// <param name="timeout">Maximum milliseconds before timeout, 0 to check infinitely</param>
+		/// <returns>Return true if the pixel matches before timeout, false otherwise</returns>
 		/// </summary>
-		public bool CheckPixel(int x, int y, byte r, byte g, byte b)
+		public bool WaitForPixel(int x, int y, int color, int timeout)
 		{
-			return GetPixel(x, y) == GDI.RGB(r, g, b);
+			DateTime start = DateTime.Now;
+			while (GetPixel(x, y) != color)
+			{
+				if (timeout > 0 && (DateTime.Now - start).TotalMilliseconds > timeout)
+				{
+					return false;
+				}
+
+				Sleep(200);
+			}
+			return true;
 		}
 
 		/// <summary> 
@@ -395,18 +410,8 @@ namespace Automation
 		/// <returns>Return true if the pixel matches before timeout, false otherwise</returns>
 		/// </summary>
 		public bool WaitForPixel(int x, int y, byte r, byte g, byte b, int timeout)
-		{
-			DateTime start = DateTime.Now;
-			while (!CheckPixel(x, y, r, g, b))
-			{
-				if (timeout > 0 && (DateTime.Now - start).TotalMilliseconds > timeout)
-				{
-					return false;
-				}
-
-				Sleep(200);
-			}
-			return true;
+		{			
+			return WaitForPixel(x, y, RGB(r, g, b), timeout);
 		}
 
 		/// <summary> 
