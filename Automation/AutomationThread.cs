@@ -115,7 +115,7 @@ namespace Automation
 			m_thread.OnStop = _OnStop;
 			m_thread.ThreadProc = _ThreadProc;
 			m_ticker.OnTick = _OnTick;
-			InitLocales();
+			RegisterLocales(); // Static method for localization
 		}
 
 		/// <summary> 
@@ -673,7 +673,7 @@ namespace Automation
 			}
 		}
 
-		private static void InitLocales()
+		private static void RegisterLocales()
 		{
 			Locale locale;
 
