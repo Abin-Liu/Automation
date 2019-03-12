@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Media;
+using System.Threading;
 using System.Windows.Forms;
 using Automation.Win32API;
 
@@ -618,6 +619,28 @@ namespace Automation
 			catch
 			{
 			}			
+		}
+
+		/// <summary> 
+		/// Send a character		
+		/// <param name="contents">The string contents to be sent</param>
+		/// <param name="delay">Delay between each 2 characters, in milliseconds</param>
+		/// </summary>
+		public static void SendString(string contents, int delay = 0)
+		{
+			if (contents == null)
+			{
+				return;
+			}
+
+			foreach (char ch in contents)
+			{
+				SendChar(ch);
+				if (delay > 0)
+				{
+					Thread.Sleep(delay);
+				}
+			}
 		}
 
 		/// <summary> 

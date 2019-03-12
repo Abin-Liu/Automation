@@ -23,11 +23,7 @@ namespace Automation.DemoApp
 			DelayBeforeAction(600);
 
 			// Input at 10 speed of 10 chars per second
-			foreach (char ch in TEST_CONTENTS)
-			{
-				SendChar(ch);
-				DelayBeforeAction(100);				
-			}
+			SendString(TEST_CONTENTS, 100);
 
 			// Click the save menu
 			DelayBeforeAction(500);
