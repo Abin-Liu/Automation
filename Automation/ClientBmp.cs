@@ -21,7 +21,7 @@ namespace Automation
 	public delegate PixelScanResults PixelScanDelegate(int x, int y, int color, Object param);
 
 	/// <summary>
-	/// Return object of MemDC.ScanPixels
+	/// Return object of ClientBmp.ScanPixels
 	/// </summary>
 	public class PixelScanData
 	{
@@ -32,95 +32,83 @@ namespace Automation
 
 	/// <summary>
 	/// The GDI GetPixel method only suits for single pixel fetching, and will freeze 
-	/// the screen if a whole region of pixels need to be scanned quickly. MemDC copies
+	/// the screen if a whole region of pixels need to be scanned quickly. ClientBmp copies
 	/// a region of pixels from screen to memory then access them, this solution improves
 	/// the performance by hundreds times.
 	/// </summary>
-	public class MemDC
+	public class ClientBmp
 	{
 		#region Public Properties
+
 		/// <summary>
-		/// Checks whether the region is valid
+		/// Checks whether the object is valid
 		/// </summary>
 		public bool Valid { get { return m_graph != null; } }
-		public int X { get; private set; } = 0;
-		public int Y { get; private set; } = 0;
-		public int Width { get; private set; } = 0;
-		public int Height { get; private set; } = 0;
-		#endregion
-
-		#region C'tors
-		/// <summary>
-		/// Default constructor
-		/// </summary>
-		public MemDC()
-		{
-		}
 
 		/// <summary>
-		/// Constructor with a Rectangle struct
-		/// <param name="boundary">The boundary of dc.</param>
+		/// The boundary area, relative to client area of the target window
 		/// </summary>
-		public MemDC(Rectangle boundary)
-		{
-			SetBoundary(boundary);
-		}
+		public Rectangle Boundary { get; private set; }
 
 		/// <summary>
-		/// Constructor with a Rectangle boundary
-		/// <param name="x">X coords of top-left corner of boundary.</param>
-		/// <param name="y">Y coords of top-left corner of boundary.</param>
-		/// <param name="width">Width of boundary.</param>
-		/// <param name="height">Height of boundary.</param>
+		/// Handle of the target window
 		/// </summary>
-		public MemDC(int x, int y, int width, int height)
-		{
-			SetBoundary(x, y, width, height);
-		}
-
-		/// <summary>
-		/// Specify the boundary rectangle
-		/// <param name="boundary">The boundary of dc.</param>
-		/// </summary>
-		public void SetBoundary(Rectangle boundary)
-		{
-			SetBoundary(boundary.Left, boundary.Top, boundary.Width, boundary.Height);
-		}
+		public IntPtr TargetWnd { get; private set; } = IntPtr.Zero;
 		#endregion
 
 		#region Boundary specification
 		/// <summary>
-		/// Specify the boundary rectangle
-		/// <param name="x">X coords of top-left corner of boundary.</param>
-		/// <param name="y">Y coords of top-left corner of boundary.</param>
-		/// <param name="width">Width of boundary.</param>
-		/// <param name="height">Height of boundary.</param>
+		/// Specify the target window of which the entire client area will be fetched
+		/// <param name="targetWnd">Handle of the target window.</param>
+		/// <returns>Return true if success, false otherwise</returns>
 		/// </summary>
-		public void SetBoundary(int x, int y, int width, int height)
+		public bool SetBoundary(IntPtr targetWnd)
 		{
-			int origWidth = Width;
-			int origHeight = Height;
-
-			X = x;
-			Y = y;
-			Width = Math.Max(width, 0);
-			Height = Math.Max(height, 0);
-
-			if (origWidth == Width && origHeight == Height)
+			if (targetWnd == IntPtr.Zero)
 			{
-				return;
+				targetWnd = Window.GetDesktopWindow();
 			}
 
-			if (Width > 0 && Height > 0)
+			return SetBoundary(targetWnd, Window.GetClientRect(targetWnd));
+		}
+
+		/// <summary>
+		/// Specify the target window and area to be fetched
+		/// <param name="targetWnd">Handle of the target window.</param>
+		/// <param name="boundary">The boundary of area to be fetched, relative to client area of the target window.</param>
+		/// <returns>Return true if success, false otherwise</returns>
+		/// </summary>
+		public bool SetBoundary(IntPtr targetWnd, Rectangle boundary)
+		{
+			if (targetWnd == IntPtr.Zero)
 			{
-				m_bmp = new Bitmap(Width, Height);
+				targetWnd = Window.GetDesktopWindow();
+			}
+
+			if (targetWnd != TargetWnd || boundary != Boundary)
+			{
+				TargetWnd = targetWnd;
+				Boundary = boundary;
+
+				m_bmp = new Bitmap(boundary.Width, boundary.Height);
 				m_graph = Graphics.FromImage(m_bmp);
 			}
-			else
-			{
-				m_graph = null;
-				m_bmp = null;
-			}			
+
+			return Valid;			
+		}
+
+		/// <summary>
+		/// Specify the target window and area to be fetched
+		/// <param name="targetWnd">Handle of the target window.</param>
+		/// <param name="x">X coords of top-left corner of boundary, relative to client area of the target window.</param>
+		/// <param name="y">Y coords of top-left corner of boundary, relative to client area of the target window.</param>
+		/// <param name="width">Width of boundary.</param>
+		/// <param name="height">Height of boundary.</param>
+		/// <returns>Return true if success, false otherwise</returns>
+		/// </summary>
+		public bool SetBoundary(IntPtr targetWnd, int x, int y, int width, int height)
+		{
+			return SetBoundary(targetWnd, new Rectangle(x, y, width, height));
 		}
 
 		/// <summary>
@@ -130,8 +118,7 @@ namespace Automation
 		/// </summary>
 		public void Offset(int x, int y)
 		{
-			X += x;
-			Y += y;
+			Boundary.Offset(x, y);
 		}
 
 		/// <summary>
@@ -140,8 +127,7 @@ namespace Automation
 		/// </summary>
 		public void Offset(Point offset)
 		{
-			X += offset.X;
-			Y += offset.Y;
+			Boundary.Offset(offset);
 		}
 		#endregion
 
@@ -152,12 +138,15 @@ namespace Automation
 		/// </summary>
 		public bool Fetch()
 		{
-			if (m_graph == null)
+			if (!Valid)
 			{
 				return false;
 			}
 
-			m_graph.CopyFromScreen(X, Y, 0, 0, new Size(Width, Height));
+			Point point = new Point(Boundary.Left, Boundary.Top);
+			Point offset = Window.ClientToScreen(TargetWnd);
+			point.Offset(offset);
+			m_graph.CopyFromScreen(point.X, point.Y, 0, 0, new Size(Boundary.Width, Boundary.Height));
 			return true;
 		}
 
@@ -169,7 +158,7 @@ namespace Automation
 		/// </summary>
 		public int GetPixel(int x, int y)
 		{
-			if (m_bmp == null)
+			if (!Valid)
 			{
 				return -1;
 			}
@@ -202,9 +191,12 @@ namespace Automation
 				interlace = 1;
 			}
 
-			for (int x = 0; x < Width; x += interlace)
+			int width = Boundary.Width;
+			int height = Boundary.Height;
+
+			for (int x = 0; x < width; x += interlace)
 			{
-				for (int y = 0; y < Height; y += interlace)
+				for (int y = 0; y < height; y += interlace)
 				{
 					int color = GetPixel(x, y);
 					PixelScanResults result = pixelScanCallback(x, y, color, param);
@@ -217,9 +209,10 @@ namespace Automation
 					// Pixel matches
 					if (result == PixelScanResults.Success)
 					{
+						// x and y are zero-based and relative to boundary
 						PixelScanData data = new PixelScanData();
-						data.X = x;
-						data.Y = y;
+						data.X = x + Boundary.Left;
+						data.Y = y + Boundary.Top;						
 						data.Color = color;
 						return data;
 					}
@@ -236,7 +229,7 @@ namespace Automation
 		/// </summary>
 		public void Save(string filePath, bool jpeg = true)
 		{
-			if (m_bmp != null)
+			if (Valid)
 			{
 				m_bmp.Save(filePath, jpeg ? ImageFormat.Jpeg : ImageFormat.Bmp);
 			}

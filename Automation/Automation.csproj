@@ -54,7 +54,7 @@
     <Compile Include="Libs\Win32API.Input.cs" />
     <Compile Include="Libs\Win32API.Window.cs" />
     <Compile Include="Locale.cs" />
-    <Compile Include="MemDC.cs" />
+    <Compile Include="ClientBmp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
