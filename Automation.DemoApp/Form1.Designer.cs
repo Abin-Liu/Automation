@@ -30,7 +30,7 @@
 		{
 			this.btnStart = new System.Windows.Forms.Button();
 			this.btnStop = new System.Windows.Forms.Button();
-			this.btnExit = new System.Windows.Forms.Button();
+			this.btnClientDC = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// btnStart
@@ -54,22 +54,22 @@
 			this.btnStop.UseVisualStyleBackColor = true;
 			this.btnStop.Click += new System.EventHandler(this.btnStop_Click);
 			// 
-			// btnExit
+			// btnClientDC
 			// 
-			this.btnExit.Location = new System.Drawing.Point(217, 72);
-			this.btnExit.Name = "btnExit";
-			this.btnExit.Size = new System.Drawing.Size(75, 23);
-			this.btnExit.TabIndex = 0;
-			this.btnExit.Text = "Exit";
-			this.btnExit.UseVisualStyleBackColor = true;
-			this.btnExit.Click += new System.EventHandler(this.btnExit_Click);
+			this.btnClientDC.Location = new System.Drawing.Point(217, 72);
+			this.btnClientDC.Name = "btnClientDC";
+			this.btnClientDC.Size = new System.Drawing.Size(75, 23);
+			this.btnClientDC.TabIndex = 0;
+			this.btnClientDC.Text = "ClientDC";
+			this.btnClientDC.UseVisualStyleBackColor = true;
+			this.btnClientDC.Click += new System.EventHandler(this.btnClientDC_Click);
 			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(356, 124);
-			this.Controls.Add(this.btnExit);
+			this.Controls.Add(this.btnClientDC);
 			this.Controls.Add(this.btnStop);
 			this.Controls.Add(this.btnStart);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
@@ -87,7 +87,7 @@
 
 		private System.Windows.Forms.Button btnStart;
 		private System.Windows.Forms.Button btnStop;
-		private System.Windows.Forms.Button btnExit;
+		private System.Windows.Forms.Button btnClientDC;
 	}
 }
 

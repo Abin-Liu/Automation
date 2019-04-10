@@ -64,5 +64,11 @@ namespace Automation.DemoApp
 			btnStart.Enabled = true;
 			btnStop.Enabled = false;			
 		}
+
+		private void btnClientDC_Click(object sender, EventArgs e)
+		{
+			FormClientDC form = new FormClientDC();
+			form.ShowDialog(this);
+		}
 	}
 }

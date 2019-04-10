@@ -331,6 +331,37 @@ namespace Automation
 		}
 		#endregion
 
+		#region Target Window Pixel Access
+		/// <summary> 
+		/// Read pixel RGB value from client area of the target window.
+		/// <param name="x">X coords (relative to client).</param>
+		/// <param name="y">Y coords (relative to client).</param>
+		/// <returns>Return RGB value if success, 0 otherwise.</returns>
+		/// </summary>
+		public int GetPixel(int x, int y)
+		{
+			ClientDC dc = new ClientDC();
+			dc.Create(TargetWnd, 1, 1);
+			return dc.CaptureAndGetPixcel(x, y);			
+		}
+
+		/// <summary> 
+		/// Keeps checking whether a pixel of the target window matches specified RGB values
+		/// <param name="x">X coords (relative to client)</param> 
+		/// <param name="y">Y coords (relative to client)</param> 
+		/// <param name="color">The RGB value</param> 
+		/// <param name="timeout">Maximum milliseconds before timeout, 0 to check infinitely</param>
+		/// <param name="sleep">Sleep the running thread between two checks, in millisecond (minimum is 100ms) </param>
+		/// <returns>Return true if the pixel matches before timeout, false otherwise</returns>
+		/// </summary>
+		public virtual bool WaitForPixel(int x, int y, int color, int timeout, int sleep = 200)
+		{
+			ClientDC dc = new ClientDC();
+			dc.Create(TargetWnd, 1, 1);
+			return dc.WaitForPixel(x, y, color, timeout, sleep);			
+		}
+		#endregion
+
 		#region Target Window Coordinates Translation
 		/// <summary> 
 		/// Client coords to screen coords
