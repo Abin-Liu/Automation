@@ -162,21 +162,13 @@ namespace Automation
 					LastError = Localize("Target window not found - ") + (TargetWndName == null ? TargetWndClass : TargetWndName);
 					return false;
 				}
-			}
-
-			// Inherited threads might need to use dc in their PreStart()
-			if (!CreateDC())
-			{
-				LastError = "Failed to create device context.";
-				return false;
-			}
+			}			
 
 			LastError = null;
 			Paused = false;
 
 			if (!PreStart())
 			{
-				ReleaseDC();
 				return false;
 			}
 
@@ -362,101 +354,6 @@ namespace Automation
 			point.Offset(offset);
 			return point;
 		}
-		#endregion
-
-		#region Target Window Pixel Access
-		/// <summary> 
-		/// Retrieve a pixel of the target window
-		/// <param name="x">Client x coords</param> 
-		/// <param name="y">Client y coords</param> 
-		/// <returns>RGB value</returns>
-		/// </summary>
-		public int GetPixel(int x, int y)
-		{
-			Point point = TranslateLocation(x, y);
-			return GDI.GetPixel(DC, point.X, point.Y);
-		}
-
-		/// <summary> 
-		/// Keeps checking whether a pixel of the target window matches specified RGB values
-		/// <param name="x">Client x coords</param> 
-		/// <param name="y">Client Y coords</param> 
-		/// <param name="color">The RGB value</param> 
-		/// <param name="timeout">Maximum milliseconds before timeout, 0 to check infinitely</param>
-		/// <returns>Return true if the pixel matches before timeout, false otherwise</returns>
-		/// </summary>
-		public bool WaitForPixel(int x, int y, int color, int timeout)
-		{
-			DateTime start = DateTime.Now;
-			while (GetPixel(x, y) != color)
-			{
-				if (timeout > 0 && (DateTime.Now - start).TotalMilliseconds > timeout)
-				{
-					return false;
-				}
-
-				Sleep(200);
-			}
-			return true;
-		}
-
-		/// <summary> 
-		/// Keeps checking whether a pixel of the target window matches specified RGB values
-		/// <param name="x">Client x coords</param> 
-		/// <param name="y">Client Y coords</param> 
-		/// <param name="r">R component</param> 
-		/// <param name="g">G component</param> 
-		/// <param name="b">B component</param> 
-		/// <param name="timeout">Maximum milliseconds before timeout, 0 to check infinitely</param>
-		/// <returns>Return true if the pixel matches before timeout, false otherwise</returns>
-		/// </summary>
-		public bool WaitForPixel(int x, int y, byte r, byte g, byte b, int timeout)
-		{			
-			return WaitForPixel(x, y, RGB(r, g, b), timeout);
-		}
-
-		/// <summary> 
-		/// Compose a RGB value
-		/// <param name="r">R component</param> 
-		/// <param name="g">G component</param> 
-		/// <param name="b">B component</param>
-		/// <returns>RGB value.</returns>
-		/// </summary>
-		public static int RGB(byte r, byte g, byte b)
-		{
-			return GDI.RGB(r, g, b);
-		}
-
-		/// <summary> 
-		/// Extract R component from an RGB value		
-		/// <param name="color">RGB value</param>
-		/// <returns>R component</returns>
-		/// </summary>
-		public static byte GetRValue(int color)
-		{
-			return GDI.GetRValue(color);
-		}
-
-		/// <summary> 
-		/// Extract G component from an RGB value		
-		/// <param name="color">RGB value</param>
-		/// <returns>G component</returns>
-		/// </summary>
-		public static byte GetGValue(int color)
-		{
-			return GDI.GetGValue(color);
-		}
-
-		/// <summary> 
-		/// Extract B component from an RGB value		
-		/// <param name="color">RGB value</param>
-		/// <returns>B component</returns>
-		/// </summary>
-		public static byte GetBValue(int color)
-		{
-			return GDI.GetBValue(color);
-		}
-
 		#endregion
 
 		#region Localizations
@@ -691,7 +588,6 @@ namespace Automation
 					m_soundPlayerAlert.Dispose();
 				}
 
-				ReleaseDC();
 				m_disposed = true;
 			}
 		}
@@ -748,7 +644,6 @@ namespace Automation
 			m_ticker.Stop();
 			m_soundPlayerStop.Play();			
 			OnStop();
-			ReleaseDC();
 			PostMessage(THREAD_MSG_STOP, 0);
 		}
 
@@ -772,7 +667,7 @@ namespace Automation
 				return;
 			}
 
-			// Make sure the target window is foreground, but allow the message window
+			// Make sure the target window is foreground unless the message window is, in which case the user may be configuring
 			IntPtr foregroundWnd = Window.GetForegroundWindow();
 			if (foregroundWnd != TargetWnd && foregroundWnd != m_messageWnd)
 			{
@@ -781,29 +676,7 @@ namespace Automation
 
 			OnTick();
 		}
-
-		/// <summary> 
-		/// Create device context
-		/// <returns>Return true is success, false otherwise</returns>
-		/// </summary>
-		private bool CreateDC()
-		{
-			ReleaseDC();
-			DC = GDI.GetDC(IntPtr.Zero);
-			return DC != IntPtr.Zero;
-		}
-
-		/// <summary> 
-		/// Release device context, very important!		
-		/// </summary>
-		private void ReleaseDC()
-		{
-			if (DC != IntPtr.Zero)
-			{
-				GDI.ReleaseDC(IntPtr.Zero, DC);
-				DC = IntPtr.Zero;
-			}
-		}
+		
 		#endregion
 	}
 }
