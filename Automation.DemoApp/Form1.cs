@@ -23,6 +23,8 @@ namespace Automation.DemoApp
 		private void Form1_Load(object sender, EventArgs e)
 		{
 			base.Form_OnLoad(sender, e);
+			m_thread.EnableBeeps = true;
+			RegisterMainKey(Keys.Home);
 		}
 
 		private void Form1_FormClosing(object sender, FormClosingEventArgs e)

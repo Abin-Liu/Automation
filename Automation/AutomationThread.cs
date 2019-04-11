@@ -58,6 +58,11 @@ namespace Automation
 		/// </summary> 
 		public string LastError { get; protected set; } = null;
 
+		/// <summary>
+		/// Turn on/off beep sounds for thread start/stop
+		/// </summary>
+		public bool EnableBeeps { get; set; } = false;
+
 		/// <summary> 
 		/// Start or stop sound alarm
 		/// </summary>
@@ -611,7 +616,8 @@ namespace Automation
 			if (!this.m_disposed)
 			{
 				if (disposing)
-				{					
+				{
+					Alerting = false;
 					m_ticker.Dispose();
 					m_thread.Dispose();
 					m_soundPlayerStart.Dispose();
@@ -659,7 +665,10 @@ namespace Automation
 
 		private void _OnStart()
 		{
-			m_soundPlayerStart.Play();
+			if (EnableBeeps)
+			{
+				m_soundPlayerStart.Play();
+			}
 
 			if (TargetWnd != IntPtr.Zero && !IsTargetWndForeground())
 			{
@@ -672,10 +681,14 @@ namespace Automation
 
 		private void _OnStop()
 		{
-			m_ticker.Stop();
-			m_soundPlayerStop.Play();			
+			m_ticker.Stop();						
 			OnStop();
 			PostMessage(THREAD_MSG_STOP, 0);
+
+			if (EnableBeeps)
+			{
+				m_soundPlayerStop.Play();
+			}
 		}
 
 		private void _ThreadProc()

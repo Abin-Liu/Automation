@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 using Automation.Win32API;
 
@@ -17,12 +18,7 @@ namespace Automation
 		/// <summary>
 		/// Whether the thread was stopped by user
 		/// </summary>
-		public bool Aborted { get { return m_thread.Aborted; } }
-
-		/// <summary>
-		/// Automatically register the {Pause} hotkey which starts/stgops the thread
-		/// </summary>
-		public bool RegisterPauseKey { get; set; } = false;
+		public bool Aborted { get { return m_thread.Aborted; } }		
 
 		/// <summary>
 		/// Automatically register the {Ctrl-Alt-B} key which triggers boss mode (hide/show the target window)
@@ -183,6 +179,26 @@ namespace Automation
 		protected virtual void OnBossMode(bool bossMode) { }
 
 		/// <summary>
+		/// Register the main hotkey which starts/stgops the thread
+		/// </summary>
+		/// <param name="key">Key value</param>
+		/// <param name="modifiers">Modifiers（Ctrl, Alt, Shift）, can be combined with | operator</param>
+		/// <returns>Return true if success, false otherwise.</returns>
+		public bool RegisterMainKey(Keys key, ModKeys modifiers = ModKeys.None)
+		{
+			UnregisterMainKey();
+			return RegisterHotKey(HOTKEY_ID_PAUSE, key, modifiers);
+		}
+
+		/// <summary>
+		/// Unregister the main hotkey which starts/stgops the thread
+		/// </summary>
+		public void UnregisterMainKey()
+		{
+			Hotkey.UnregisterHotKey(this.Handle, HOTKEY_ID_PAUSE);
+		}
+
+		/// <summary>
 		/// Register a hotkey, whenever the user presses it, the form will be notified
 		/// <param name="id">Hotkey id</param>
 		/// <param name="key">Key value</param>
@@ -191,7 +207,18 @@ namespace Automation
 		/// </summary>
 		protected bool RegisterHotKey(int id, Keys key, ModKeys mods = ModKeys.None)
 		{
-			return Hotkey.RegisterHotKey(this.Handle, id, key, mods);
+			if (m_hotkeys.IndexOf(id) != -1)
+			{
+				return false;
+			}
+
+			if (!Hotkey.RegisterHotKey(this.Handle, id, key, mods))
+			{
+				return false;
+			}
+
+			m_hotkeys.Add(id);
+			return true;
 		}
 
 		/// <summary>
@@ -200,7 +227,10 @@ namespace Automation
 		/// </summary>
 		protected void UnregisterHotKey(int id)
 		{
-			Hotkey.UnregisterHotKey(this.Handle, id);
+			if (m_hotkeys.Remove(id))
+			{
+				Hotkey.UnregisterHotKey(this.Handle, id);
+			}			
 		}
 
 		/// <summary>
@@ -212,14 +242,9 @@ namespace Automation
 			{
 				this.Hide();
 				this.ShowInTaskbar = false;
-			}
+			}			
 
-			if (RegisterPauseKey && !RegisterHotKey(WM_HOTKEY_PAUSE, Keys.Pause))
-			{
-				Message("Failed to register the {Pause} key.");
-			}
-
-			if (RegisterBossMode && !RegisterHotKey(WM_HOTKEY_BOSSMODE, Keys.B, ModKeys.Control | ModKeys.Alt))
+			if (RegisterBossMode && !RegisterHotKey(HOTKEY_ID_BOSSMODE, Keys.B, ModKeys.Control | ModKeys.Alt))
 			{
 				Message("Failed to register the {Ctrl-Alt-B} key.");
 			}
@@ -234,7 +259,7 @@ namespace Automation
 			{
 				// Display a confirmation is the thread is alive
 				e.Cancel = !Confirm("The thread is still running, exit anyway?");
-			}
+			}			
 		}
 
 		/// <summary>
@@ -242,15 +267,13 @@ namespace Automation
 		/// </summary>
 		protected virtual void Form_OnClosed(object sender, FormClosedEventArgs e)
 		{
-			if (RegisterPauseKey)
+			// cleanup
+			foreach (int id in m_hotkeys)
 			{
-				UnregisterHotKey(WM_HOTKEY_PAUSE);
+				Hotkey.UnregisterHotKey(this.Handle, id);
 			}
 
-			if (RegisterBossMode)
-			{
-				UnregisterHotKey(WM_HOTKEY_BOSSMODE);
-			}
+			m_hotkeys.Clear();
 
 			m_thread.Stop();
 			m_thread.Alerting = false;
@@ -270,11 +293,11 @@ namespace Automation
 			if (message == 0x0312) // Win32 WM_HOTKEY = 0x0312
 			{
 				int id = IntPtrToInt(wParam);
-				if (id == WM_HOTKEY_PAUSE)
+				if (id == HOTKEY_ID_PAUSE)
 				{
 					ToggleThread();
 				}
-				else if (id == WM_HOTKEY_BOSSMODE)
+				else if (id == HOTKEY_ID_BOSSMODE)
 				{
 					BossMode = !BossMode;
 				}
@@ -308,9 +331,10 @@ namespace Automation
 		}
 
 		#region Private Members
-		private static readonly int WM_HOTKEY_PAUSE = 9035; // Pause key id
-		private static readonly int WM_HOTKEY_BOSSMODE = 9036; // Boss mode key id
+		private static readonly int HOTKEY_ID_PAUSE = 9035; // Main hotkey id
+		private static readonly int HOTKEY_ID_BOSSMODE = 9036; // Boss mode hotkey id
 		private AutomationThread m_thread = null;
+		private List<int> m_hotkeys = new List<int>();
 		private bool m_bossMode = false;
 
 		private static int IntPtrToInt(IntPtr p)
