@@ -48,7 +48,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="AutomationThread.cs" />
-    <Compile Include="ClientDC.cs" />
+    <Compile Include="MemDC.cs" />
     <Compile Include="EventThread.cs" />
     <Compile Include="Win32API\Win32API.Hotkey.cs" />
     <Compile Include="Win32API\Win32API.Input.cs" />

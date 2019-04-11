@@ -26,17 +26,7 @@ namespace Automation
 		/// <summary>
 		/// Handle of the target window
 		/// </summary>
-		public IntPtr TargetWnd { get; protected set; } = IntPtr.Zero;
-
-		/// <summary> 
-		/// Win32 device context
-		/// </summary> 
-		public IntPtr DC { get; private set; } = IntPtr.Zero;
-
-		/// <summary> 
-		/// Whether the instance can read screen pixels
-		/// </summary> 
-		public bool Valid { get { return DC != IntPtr.Zero; } }
+		public IntPtr TargetWnd { get; protected set; } = IntPtr.Zero;		
 
 		/// <summary> 
 		/// Client rectangle of the target window, top-left is always 0,0
@@ -345,9 +335,8 @@ namespace Automation
 		/// </summary>
 		public int GetPixel(int x, int y)
 		{
-			ClientDC dc = new ClientDC();
-			dc.Create(TargetWnd, 1, 1);
-			return dc.CaptureAndGetPixcel(x, y);			
+			MemDC dc = new MemDC();
+			return dc.CaptureAndGetPixel(x + ClientToScreen.X, y + ClientToScreen.Y);			
 		}
 
 		/// <summary> 
@@ -361,9 +350,8 @@ namespace Automation
 		/// </summary>
 		public virtual bool WaitForPixel(int x, int y, int color, int timeout, int sleep = 200)
 		{
-			ClientDC dc = new ClientDC();
-			dc.Create(TargetWnd, 1, 1);
-			return dc.WaitForPixel(x, y, color, timeout, sleep);			
+			MemDC dc = new MemDC();
+			return dc.WaitForPixel(x + ClientToScreen.X, y + ClientToScreen.Y, color, timeout, sleep);			
 		}
 		#endregion
 

@@ -12,8 +12,6 @@ namespace Automation.DemoApp
 {
 	public partial class FormClientDC : Form
 	{
-		ClientDC m_dc = new ClientDC();
-
 		public FormClientDC()
 		{
 			InitializeComponent();
@@ -24,10 +22,12 @@ namespace Automation.DemoApp
 			string text = txtHandle.Text.Trim();
 			try
 			{
-				int value = Convert.ToInt32(text, 16);
-				m_dc.Create((IntPtr)value, pictureBox1.Width, pictureBox1.Height);
-				m_dc.Capture(100, 100, 100, 100);
-				pictureBox1.Image = m_dc.Bitmap;
+				IntPtr hwnd = (IntPtr)Convert.ToInt32(text, 16);
+				Rectangle rect = Win32API.Window.GetWindowRect(hwnd);
+				MemDC dc = new MemDC();
+				dc.Capture(rect.Left, rect.Top, 100, 100);
+				int pixel = dc.GetPixel(80, 80);
+				pictureBox1.Image = dc.Bitmap;
 			}
 			catch
 			{
