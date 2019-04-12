@@ -3,7 +3,8 @@ using System.Drawing;
 using System.Media;
 using System.Threading;
 using System.Windows.Forms;
-using Automation.Win32API;
+using Win32API;
+using MFGLib;
 
 namespace Automation
 {
@@ -637,8 +638,8 @@ namespace Automation
 
 		#region Private Members
 		private static LocaleCollection m_locales = new LocaleCollection();
-		private EventThread m_thread = new EventThread(true);
-		private TickThread m_ticker = new TickThread();
+		private EventThread m_thread = new EventThread();
+		private TickEventThread m_ticker = new TickEventThread();
 		private bool m_alerting = false; // Sound alarm on?
 		private IntPtr m_messageWnd = IntPtr.Zero;
 		private SoundPlayer m_soundPlayerStart = new SoundPlayer(Resources.ResourceManager.GetStream("Start"));

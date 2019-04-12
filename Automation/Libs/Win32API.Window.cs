@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Automation.Win32API
+namespace Win32API
 {
 	public delegate bool EnumWindowsCallBack(IntPtr hwnd, int lParam);	
 

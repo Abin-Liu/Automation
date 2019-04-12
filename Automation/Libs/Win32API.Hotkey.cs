@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace Automation.Win32API
+namespace Win32API
 {
 	public class Hotkey
 	{

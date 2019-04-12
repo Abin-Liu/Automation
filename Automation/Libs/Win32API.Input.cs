@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
-using System.Threading;
 using System.Windows.Forms;
 
-namespace Automation
+namespace Win32API
 {
 	public enum ModKeys { None = 0, Shift = 0x01, Control = 0x02, Alt = 0x04 };
-}
 
-namespace Automation.Win32API
-{
 	public class Input
 	{
 		public static void MouseMove(int x, int y)

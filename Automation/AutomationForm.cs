@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using Automation.Win32API;
+using Win32API;
 
 namespace Automation
 {

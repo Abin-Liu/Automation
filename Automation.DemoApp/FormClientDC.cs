@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using Automation;
+using Win32API;
 
 namespace Automation.DemoApp
 {
@@ -19,22 +20,23 @@ namespace Automation.DemoApp
 
 		private void btnCapture_Click(object sender, EventArgs e)
 		{
+			IntPtr hwnd;
 			string text = txtHandle.Text.Trim();
 			try
 			{
-				IntPtr hwnd = (IntPtr)Convert.ToInt32(text, 16);
-				Rectangle rect = Win32API.Window.GetWindowRect(hwnd);
-				MemDC dc = new MemDC();
-				dc.Capture(rect.Left, rect.Top, 100, 100);
-				int pixel = dc.GetPixel(80, 80);
-				pictureBox1.Image = dc.Bitmap;
+				int value = Convert.ToInt32(text, 16);
+				hwnd = (IntPtr)value;
 			}
 			catch
 			{
-				MessageBox.Show("Window handle is required.");
-				txtHandle.Focus();
-				txtHandle.SelectAll();
+				hwnd = Window.GetDesktopWindow();
 			}
+
+			Rectangle rect = Window.GetWindowRect(hwnd);
+			MemDC dc = new MemDC();
+			dc.Capture(rect.Left, rect.Top, 100, 100);
+			int pixel = dc.GetPixel(80, 80);
+			pictureBox1.Image = dc.Bitmap;
 		}
 	}
 }
