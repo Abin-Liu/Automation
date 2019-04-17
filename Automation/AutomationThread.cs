@@ -27,7 +27,7 @@ namespace Automation
 		/// <summary>
 		/// Handle of the target window
 		/// </summary>
-		public IntPtr TargetWnd { get; protected set; } = IntPtr.Zero;		
+		public IntPtr TargetWnd { get; protected set; } = IntPtr.Zero;
 
 		/// <summary> 
 		/// Client rectangle of the target window, top-left is always 0,0
@@ -280,7 +280,6 @@ namespace Automation
 		#endregion
 
 		#region Target Window  Interactions
-
 		/// <summary> 
 		/// Whether the target window is foreground
 		/// <returns>Return true if the target window is foreground, false otherwise</returns>
@@ -353,6 +352,58 @@ namespace Automation
 		{
 			MemDC dc = new MemDC();
 			return dc.WaitForPixel(x + ClientToScreen.X, y + ClientToScreen.Y, color, timeout, sleep);			
+		}
+
+		/// <summary>
+		/// Compose rgb values into an integer
+		/// </summary>
+		/// <param name="r">Value of r component</param>
+		/// <param name="g">Value of g component</param>
+		/// <param name="b">Value of b component</param>
+		/// <returns>Integer form of rgb value</returns>
+		public static int RGB(byte r, byte g, byte b)
+		{
+			return MemDC.RGB(r, g, b);
+		}
+
+		/// <summary>
+		/// Compose rgb values into an integer, unlike System.Drawing.Color, it eliminates alpha value
+		/// </summary>
+		/// <param name="color">Value of color</param>		
+		/// <returns>Integer form of rgb value</returns>
+		public static int RGB(Color color)
+		{
+			return MemDC.RGB(color);
+		}
+
+		/// <summary>
+		/// Extract the r component from an integer grb value
+		/// </summary>
+		/// <param name="color">Integer form of rgb value</param>
+		/// <returns>Value of the r component</returns>
+		public static byte GetRValue(int color)
+		{
+			return MemDC.GetRValue(color);
+		}
+
+		/// <summary>
+		/// Extract the g component from an integer grb value
+		/// </summary>
+		/// <param name="color">Integer form of rgb value</param>
+		/// <returns>Value of the g component</returns>
+		public static byte GetGValue(int color)
+		{
+			return MemDC.GetGValue(color);
+		}
+
+		/// <summary>
+		/// Extract the b component from an integer grb value
+		/// </summary>
+		/// <param name="color">Integer form of rgb value</param>
+		/// <returns>Value of the b component</returns>
+		public static byte GetBValue(int color)
+		{
+			return MemDC.GetBValue(color);
 		}
 		#endregion
 
@@ -670,14 +721,13 @@ namespace Automation
 
 		private void _OnStop()
 		{
-			m_ticker.Stop();						
-			OnStop();
-			PostMessage(THREAD_MSG_STOP, 0);
-
 			if (EnableBeeps)
 			{
 				m_soundPlayerStop.Play();
 			}
+			m_ticker.Stop();
+			OnStop();
+			PostMessage(THREAD_MSG_STOP, 0);
 		}
 
 		private void _ThreadProc()
