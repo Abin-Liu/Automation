@@ -197,9 +197,9 @@ namespace Automation
 		/// Sleep the current thread
 		/// <param name="milliseconds">Milliseconds</param> 
 		/// </summary>
-		public void Sleep(int milliseconds)
+		public static void Sleep(int milliseconds)
 		{
-			m_thread.Sleep(milliseconds);
+			Thread.Sleep(milliseconds);
 		}
 
 		/// <summary> 
@@ -500,7 +500,7 @@ namespace Automation
 		/// Scroll the mouse wheel
 		/// <param name="scrollUp">Wheel direction</param> 
 		/// </summary>
-		public static void MouseWheel(bool scrollUp)
+		public static void MouseWheel(bool scrollUp = false)
 		{
 			Input.MouseWheel(scrollUp);
 		}
