@@ -49,18 +49,29 @@ namespace Automation
 				return false;
 			}
 
-			if (Bitmap == null || Bitmap.Width != width || Bitmap.Height != height)
+			try
 			{
-				Bitmap = new Bitmap(width, height);
+				if (Bitmap == null || Bitmap.Width != width || Bitmap.Height != height)
+				{
+					Bitmap = new Bitmap(width, height);
+				}
+
+				x = Math.Max(x, 0);
+				y = Math.Max(y, 0);
+
+				// copy from screen
+				Graphics graph = Graphics.FromImage(Bitmap);
+				graph.CopyFromScreen(x, y, 0, 0, new Size(width, height));
+				return true;
+			}
+			catch (ThreadAbortException e)
+			{
+				throw e;
+			}
+			catch
+			{
+				return false;
 			}			
-
-			x = Math.Max(x, 0);
-			y = Math.Max(y, 0);
-
-			// copy from screen
-			Graphics graph = Graphics.FromImage(Bitmap);
-			graph.CopyFromScreen(x, y, 0, 0, new Size(width, height));
-			return true;
 		}
 
 		/// <summary> 
@@ -81,13 +92,23 @@ namespace Automation
 				return COLOR_INVALID;
 			}			
 
-			Color color = Bitmap.GetPixel(x, y);
-			if (color.IsEmpty)
+			try
+			{
+				Color color = Bitmap.GetPixel(x, y);
+				if (color.IsEmpty)
+				{
+					return COLOR_INVALID;
+				}
+				return RGB(color.R, color.G, color.B);
+			}
+			catch (ThreadAbortException e)
+			{
+				throw e;
+			}
+			catch
 			{
 				return COLOR_INVALID;
 			}
-
-			return RGB(color.R, color.G, color.B);
 		}
 
 		/// <summary>
