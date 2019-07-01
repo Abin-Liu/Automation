@@ -38,10 +38,18 @@ namespace Automation
 			set
 			{
 				m_bossMode = value;
-				Window.ShowWindow(m_thread.TargetWnd, value ? Window.SW_HIDE : Window.SW_SHOW);
-				OnBossMode(value);				
+				if (m_thread.TargetWnd != IntPtr.Zero)
+				{
+					Window.ShowWindow(m_thread.TargetWnd, m_bossMode ? Window.SW_HIDE : Window.SW_SHOW);
+				}				
+				OnBossMode(m_bossMode);				
 			}
 		}
+
+		/// <summary>
+		/// Thread tick interval, in milliseconds, 0 to disable ticking
+		/// </summary>
+		public int ThreadTickInterval { get; set; } = 1000;
 
 		/// <summary>
 		/// Whether hide main form (using a notification ion?)
@@ -59,12 +67,11 @@ namespace Automation
 
 		/// <summary> 
 		/// Start the thread
-		/// <param name="tickInterval">Interva of the ticker.</param> 
 		/// <returns>Return true if the thread starts successfully, false otherwise.</returns>
 		/// </summary>
-		public virtual bool StartThread(int tickInterval = 1000)
+		public virtual bool StartThread()
 		{
-			bool success = m_thread.Start(this, tickInterval);
+			bool success = m_thread.Start(this, ThreadTickInterval);
 			if (!success)
 			{
 				Message(m_thread.LastError);
@@ -274,6 +281,11 @@ namespace Automation
 			}
 
 			m_hotkeys.Clear();
+
+			if (m_bossMode && m_thread.TargetWnd != IntPtr.Zero && !Window.IsWindowVisible(m_thread.TargetWnd))
+			{
+				Window.ShowWindow(m_thread.TargetWnd, Window.SW_SHOW);
+			}
 
 			m_thread.Stop();
 			m_thread.Alerting = false;

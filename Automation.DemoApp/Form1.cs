@@ -17,6 +17,7 @@ namespace Automation.DemoApp
 		public Form1()
 		{
 			SetThread(m_thread);
+			RegisterBossMode = true;
 			InitializeComponent();
 		}
 
