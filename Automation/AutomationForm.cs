@@ -32,17 +32,29 @@ namespace Automation
 		{
 			get
 			{
-				return m_bossMode;
+				return m_bossModeWnd != IntPtr.Zero;
 			}
 
 			set
 			{
-				m_bossMode = value;
-				if (m_thread.TargetWnd != IntPtr.Zero)
+				if (value)
 				{
-					Window.ShowWindow(m_thread.TargetWnd, m_bossMode ? Window.SW_HIDE : Window.SW_SHOW);
-				}				
-				OnBossMode(m_bossMode);				
+					m_bossModeWnd = m_thread.FindTargetWnd();
+					if (m_bossModeWnd != IntPtr.Zero)
+					{
+						Window.ShowWindow(m_bossModeWnd, Window.SW_HIDE);
+					}
+				}
+				else
+				{
+					if (m_bossModeWnd != IntPtr.Zero)
+					{
+						Window.ShowWindow(m_bossModeWnd, Window.SW_SHOW);
+					}
+					m_bossModeWnd = IntPtr.Zero;
+				}
+			
+				OnBossMode(m_bossModeWnd != IntPtr.Zero);				
 			}
 		}
 
@@ -282,10 +294,11 @@ namespace Automation
 
 			m_hotkeys.Clear();
 
-			if (m_bossMode && m_thread.TargetWnd != IntPtr.Zero && !Window.IsWindowVisible(m_thread.TargetWnd))
+			if (m_bossModeWnd != IntPtr.Zero && !Window.IsWindowVisible(m_bossModeWnd))
 			{
-				Window.ShowWindow(m_thread.TargetWnd, Window.SW_SHOW);
+				Window.ShowWindow(m_bossModeWnd, Window.SW_SHOW);
 			}
+			m_bossModeWnd = IntPtr.Zero;			
 
 			m_thread.Stop();
 			m_thread.Alerting = false;
@@ -302,52 +315,54 @@ namespace Automation
 			IntPtr wParam = m.WParam;
 			IntPtr lParam = m.LParam;
 
-			if (message == 0x0312) // Win32 WM_HOTKEY = 0x0312
+			switch (message)
 			{
-				int id = IntPtrToInt(wParam);
-				if (id == HOTKEY_ID_PAUSE)
-				{
-					ToggleThread();
-				}
-				else if (id == HOTKEY_ID_BOSSMODE)
-				{
-					BossMode = !BossMode;
-				}
-				else
-				{
-					OnHotKey(id); // other hotkey
-				}
-			}
-			else if (message == AutomationThread.THREAD_MSG_ID)
-			{
-				int flag = IntPtrToInt(wParam);
-				if (flag == AutomationThread.THREAD_MSG_START)
-				{
-					OnThreadStart();
-				}
-				else if (flag == AutomationThread.THREAD_MSG_STOP)
-				{
-					OnThreadStop();
-				}
-				else
-				{
-					OnThreadMessage(flag, IntPtrToInt(lParam));
-				}
-			}
-			else
-			{
-				OnMessage(m.Msg, wParam, lParam); // generic messages
-			}
+				case 0x0312: // Win32 WM_HOTKEY = 0x0312
+					int id = IntPtrToInt(wParam);
+					if (id == HOTKEY_ID_PAUSE)
+					{
+						ToggleThread();
+					}
+					else if (id == HOTKEY_ID_BOSSMODE)
+					{
+						BossMode = !BossMode;
+					}
+					else
+					{
+						OnHotKey(id); // other hotkey
+					}
+					break;
+
+				case AutomationThread.THREAD_MSG_ID:
+					int flag = IntPtrToInt(wParam);
+					if (flag == AutomationThread.THREAD_MSG_START)
+					{
+						OnThreadStart();
+					}
+					else if (flag == AutomationThread.THREAD_MSG_STOP)
+					{
+						OnThreadStop();
+					}
+					else
+					{
+						OnThreadMessage(flag, IntPtrToInt(lParam));
+					}
+					break;
+
+				default:
+					OnMessage(m.Msg, wParam, lParam); // generic messages
+					break;
+			}		
 
 			base.WndProc(ref m);
 		}
 
 		#region Private Members
-		private static readonly int HOTKEY_ID_PAUSE = 9035; // Main hotkey id
-		private static readonly int HOTKEY_ID_BOSSMODE = 9036; // Boss mode hotkey id
+		private const int HOTKEY_ID_PAUSE = 9035; // Main hotkey id
+		private const int HOTKEY_ID_BOSSMODE = 9036; // Boss mode hotkey id
 		private AutomationThread m_thread = null;
 		private List<int> m_hotkeys = new List<int>();
-		private bool m_bossMode = false;
+		private IntPtr m_bossModeWnd = IntPtr.Zero;
 
 		private static int IntPtrToInt(IntPtr p)
 		{

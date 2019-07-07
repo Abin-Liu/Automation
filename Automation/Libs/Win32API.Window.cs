@@ -122,27 +122,27 @@ namespace Win32API
 		[DllImport("user32.dll")]
 		public static extern bool ShowWindow(IntPtr hwnd, int nCmdShow);
 
-		public static readonly int SW_HIDE = 0;
-		public static readonly int SW_SHOWNORMAL = 1;
-		public static readonly int SW_NORMAL = 1;
-		public static readonly int SW_SHOWMINIMIZED = 2;
-		public static readonly int SW_SHOWMAXIMIZED = 3;
-		public static readonly int SW_MAXIMIZE = 3;
-		public static readonly int SW_SHOWNOACTIVATE = 4;
-		public static readonly int SW_SHOW = 5;
-		public static readonly int SW_MINIMIZE = 6;
-		public static readonly int SW_SHOWMINNOACTIVE = 7;
-		public static readonly int SW_SHOWNA = 8;
-		public static readonly int SW_RESTORE = 9;
-		public static readonly int SW_SHOWDEFAULT = 10;
-		public static readonly int SW_FORCEMINIMIZE = 11;
-		public static readonly int SW_MAX = 11;
+		public const int SW_HIDE = 0;
+		public const int SW_SHOWNORMAL = 1;
+		public const int SW_NORMAL = 1;
+		public const int SW_SHOWMINIMIZED = 2;
+		public const int SW_SHOWMAXIMIZED = 3;
+		public const int SW_MAXIMIZE = 3;
+		public const int SW_SHOWNOACTIVATE = 4;
+		public const int SW_SHOW = 5;
+		public const int SW_MINIMIZE = 6;
+		public const int SW_SHOWMINNOACTIVE = 7;
+		public const int SW_SHOWNA = 8;
+		public const int SW_RESTORE = 9;
+		public const int SW_SHOWDEFAULT = 10;
+		public const int SW_FORCEMINIMIZE = 11;
+		public const int SW_MAX = 11;
 
 		[DllImport("user32.dll")]
 		public extern static IntPtr GetDesktopWindow();
 
-		public static readonly int WM_USER = 0x0400; // define your own message id after this
-		public static readonly int WM_APP = 0x8000;
+		public const int WM_USER = 0x0400; // define your own message id after this
+		public const int WM_APP = 0x8000;
 
 		[DllImport("User32.dll")]
 		public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);

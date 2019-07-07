@@ -15,16 +15,6 @@ namespace Automation
 	{
 		#region Public Properties
 		/// <summary>
-		/// Text of the target window
-		/// </summary>
-		public string TargetWndName { get; protected set; } = null;
-
-		/// <summary>
-		/// Class name of the target window
-		/// </summary>
-		public string TargetWndClass { get; protected set; } = null;
-
-		/// <summary>
 		/// Handle of the target window
 		/// </summary>
 		public IntPtr TargetWnd { get; protected set; } = IntPtr.Zero;
@@ -138,27 +128,12 @@ namespace Automation
 				return false;
 			}
 
-			if (TargetWnd != IntPtr.Zero && !Window.IsWindow(TargetWnd))
-			{
-				TargetWnd = IntPtr.Zero;
-			}
-
+			TargetWnd = FindTargetWnd();
 			if (TargetWnd == IntPtr.Zero)
 			{
-				// The target window needs to be found before starts
-				if (TargetWndClass == null && TargetWndName == null)
-				{
-					LastError = Localize("Neither window text nor class name is specified for target window.");
-					return false;
-				}
-
-				TargetWnd = Window.FindWindow(TargetWndClass, TargetWndName);
-				if (TargetWnd == IntPtr.Zero)
-				{
-					LastError = Localize("Target window not found - ") + (TargetWndName == null ? TargetWndClass : TargetWndName);
-					return false;
-				}
-			}			
+				LastError = Localize("Target window not found.");
+				return false;
+			}
 
 			LastError = null;
 			Paused = false;
@@ -233,6 +208,12 @@ namespace Automation
 		#endregion
 
 		#region Overrides
+		/// <summary>
+		/// Find handle of the target window which the thread is dealing with
+		/// </summary>
+		/// <returns>Handle of the target window, or IntPtr.Zero if not exists</returns>
+		public abstract IntPtr FindTargetWnd();
+
 		/// <summary> 
 		/// A callback checking before the thread starts
 		/// <returns>Return true to allow the thread to start, false otherwise.</returns>
@@ -261,9 +242,9 @@ namespace Automation
 		#endregion
 
 		#region Message Window Interactions
-		public static readonly int THREAD_MSG_ID = Window.WM_APP + 3317;
-		public static readonly int THREAD_MSG_START = 16677923;
-		public static readonly int THREAD_MSG_STOP = 16677924;
+		public const int THREAD_MSG_ID = Window.WM_APP + 3317;
+		public const int THREAD_MSG_START = 16677923;
+		public const int THREAD_MSG_STOP = 16677924;
 
 		/// <summary> 
 		/// Send a message to the message window
@@ -280,6 +261,18 @@ namespace Automation
 		#endregion
 
 		#region Target Window  Interactions
+
+		/// <summary>
+		/// Static method to find a window using class and title
+		/// </summary>
+		/// <param name="windowClass">Class name of the window, null to ignore</param>
+		/// <param name="windowName">Window title of the window, null to ignore</param>
+		/// <returns></returns>
+		public static IntPtr FindWindow(string windowClass, string windowName)
+		{
+			return Window.FindWindow(windowClass, windowName);
+		}
+
 		/// <summary> 
 		/// Whether the target window is foreground
 		/// <returns>Return true if the target window is foreground, false otherwise</returns>
@@ -675,14 +668,12 @@ namespace Automation
 
 			locale = RegisterLocale("zh-CN");
 			locale["Thread is already running."] = "线程已经在运行中。";
-			locale["Neither window text nor class name is specified for target window."] = "目标窗口的名称与类名均未定义。";
-			locale["Target window not found - "] = "目标窗口未找到 - ";
+			locale["Target window not found."] = "目标窗口未找到。";
 			locale["Failed to create device context. "] = "创建DC失败。";
 
 			locale = RegisterLocale("zh-TW");
 			locale["Thread is already running."] = "線程已經在運行中。";
-			locale["Neither window text nor class name is specified for target window."] = "目標窗體的名稱與類名均未定義。";
-			locale["Target window not found - "] = "目標窗體未找到 - ";
+			locale["Target window not found."] = "目標窗體未找到。";
 			locale["Failed to create device context. "] = "創建DC失敗。";
 		}
 		#endregion

@@ -173,16 +173,6 @@
             The abstract thread class interact with the target window
             </summary>
         </member>
-        <member name="P:Automation.AutomationThread.TargetWndName">
-            <summary>
-            Text of the target window
-            </summary>
-        </member>
-        <member name="P:Automation.AutomationThread.TargetWndClass">
-            <summary>
-            Class name of the target window
-            </summary>
-        </member>
         <member name="P:Automation.AutomationThread.TargetWnd">
             <summary>
             Handle of the target window
@@ -273,6 +263,12 @@
             <param name="obj">Object to unlock, use this if null</param> 
             </summary>
         </member>
+        <member name="M:Automation.AutomationThread.FindTargetWnd">
+            <summary>
+            Find handle of the target window which the thread is dealing with
+            </summary>
+            <returns>Handle of the target window, or IntPtr.Zero if not exists</returns>
+        </member>
         <member name="M:Automation.AutomationThread.PreStart">
             <summary> 
             A callback checking before the thread starts
@@ -305,6 +301,14 @@
             <param name="wParam">wParam</param> 
             <param name="lParam">lParam</param> 		/// 
             </summary>
+        </member>
+        <member name="M:Automation.AutomationThread.FindWindow(System.String,System.String)">
+            <summary>
+            Static method to find a window using class and title
+            </summary>
+            <param name="windowClass">Class name of the window, null to ignore</param>
+            <param name="windowName">Window title of the window, null to ignore</param>
+            <returns></returns>
         </member>
         <member name="M:Automation.AutomationThread.IsTargetWndForeground">
             <summary> 
