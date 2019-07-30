@@ -6,9 +6,10 @@ namespace Win32API
 {
 	public class Hotkey
 	{
-		static readonly int MOD_ALT = 0x01;
-		static readonly int MOD_CONTROL = 0x02;
-		static readonly int MOD_SHIFT = 0x04;
+		const int WM_HOTKEY = 0x0312;
+		const int MOD_ALT = 0x01;
+		const int MOD_CONTROL = 0x02;
+		const int MOD_SHIFT = 0x04;
 
 		[DllImport("user32.dll")]
 		static extern bool RegisterHotKey(IntPtr hWnd, int id, int modifiers, Keys vk);
@@ -39,7 +40,7 @@ namespace Win32API
 
 		public static int IsHotkeyEvent(ref Message m)
 		{
-			if (m.Msg == 0x0312) // #define WM_HOTKEY 0x0312
+			if (m.Msg == WM_HOTKEY)
 			{
 				return (int)m.WParam;
 			}

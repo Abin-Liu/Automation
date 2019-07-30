@@ -157,14 +157,14 @@ namespace Win32API
 		[DllImport("user32.dll")]
 		static extern int mouse_event(int flags, int x, int y, int buttons, int extraInfo);
 
-		static readonly int MOUSEEVENTF_MOVE = 0x0001; //移动鼠标
-		static readonly int MOUSEEVENTF_LEFTDOWN = 0x0002; //模拟鼠标左键按下
-		static readonly int MOUSEEVENTF_LEFTUP = 0x0004; //模拟鼠标左键抬起
-		static readonly int MOUSEEVENTF_RIGHTDOWN = 0x0008; //模拟鼠标右键按下
-		static readonly int MOUSEEVENTF_RIGHTUP = 0x0010; //模拟鼠标右键抬起
-		static readonly int MOUSEEVENTF_MIDDLEDOWN = 0x0020; //模拟鼠标中键按下 
-		static readonly int MOUSEEVENTF_MIDDLEUP = 0x0040; //模拟鼠标中键抬起
-		static readonly int MOUSEEVENTF_WHEEL = 0x800; //模拟鼠标滚轮
+		const int MOUSEEVENTF_MOVE = 0x0001; //移动鼠标
+		const int MOUSEEVENTF_LEFTDOWN = 0x0002; //模拟鼠标左键按下
+		const int MOUSEEVENTF_LEFTUP = 0x0004; //模拟鼠标左键抬起
+		const int MOUSEEVENTF_RIGHTDOWN = 0x0008; //模拟鼠标右键按下
+		const int MOUSEEVENTF_RIGHTUP = 0x0010; //模拟鼠标右键抬起
+		const int MOUSEEVENTF_MIDDLEDOWN = 0x0020; //模拟鼠标中键按下 
+		const int MOUSEEVENTF_MIDDLEUP = 0x0040; //模拟鼠标中键抬起
+		const int MOUSEEVENTF_WHEEL = 0x800; //模拟鼠标滚轮
 
 		[DllImport("user32.dll")]
 		public static extern int SetCursorPos(int x, int y);
@@ -183,6 +183,14 @@ namespace Win32API
 		static extern int GetKeyboardState(byte[] states);
 
 		[DllImport("user32.dll")]
-		static extern void keybd_event(byte vkCode, byte scan, int flags, int extraInfo);		
+		static extern void keybd_event(byte vkCode, byte scan, int flags, int extraInfo);
+
+		[DllImport("user32.dll")]
+		public static extern short GetAsyncKeyState(Keys key);
+
+		public static bool IsKeyDown(Keys key)
+		{
+			return (GetAsyncKeyState(key) & 0x8000) != 0;
+		}
 	}
 }

@@ -627,7 +627,17 @@ namespace Automation
 		public static void KeyUp(Keys key, ModKeys mods = ModKeys.None)
 		{
 			Input.KeyUp(key, mods);
-		}		
+		}
+
+		/// <summary>
+		/// Check whether a key is currently held down
+		/// </summary>
+		/// <param name="key">Keys value</param>
+		/// <returns>Return true if the specified key is held down, false otherwise.</returns>
+		public static bool IsKeyDown(Keys key)
+		{
+			return Input.IsKeyDown(key);
+		}
 		#endregion
 
 		#region IDisposable Interface Implememtation

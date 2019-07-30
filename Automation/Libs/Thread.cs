@@ -89,19 +89,19 @@ namespace MFGLib
 		/// <summary>
 		/// Lock an object
 		/// </summary>
-		/// <param name="obj">Object to be marked exclusive</param>
-		public void Lock(Object obj)
+		/// <param name="target">Object to be marked exclusive</param>
+		public void Lock(object target = null)
 		{
-			Monitor.Enter(obj);
+			Monitor.Enter(target ?? m_lock);
 		}
 
 		/// <summary>
 		/// Unlock an object
 		/// </summary>
-		/// <param name="obj">Object no longer exclusive</param>
-		public void Unlock(Object obj)
+		/// <param name="target">Object no longer exclusive</param>
+		public void Unlock(object target = null)
 		{
-			Monitor.Exit(obj);
+			Monitor.Exit(target ?? m_lock);
 		}
 
 		/// <summary>
@@ -114,6 +114,33 @@ namespace MFGLib
 		}
 
 		/// <summary>
+		/// Wait for a thread to stop, the function only return after the thread stops or timeout occurred.
+		/// </summary>
+		/// <param name="thread">The target thread to be waited.</param>
+		/// <param name="timeout">Timeout in milliseconds, 0 means infinite.</param>
+		/// <returns></returns>
+		public static bool WaitForSingleObject(GenericThread thread, int timeout = 0)
+		{
+			if (thread == null)
+			{
+				return true;
+			}
+
+			DateTime start = DateTime.Now;
+			while (thread.IsAlive)
+			{
+				if (timeout > 0 && (DateTime.Now - start).TotalMilliseconds > timeout)
+				{
+					return false;
+				}
+
+				Thread.Sleep(100);
+			}
+
+			return true;
+		}
+
+		/// <summary>
 		/// Abstract member to be overridden, derived classes must provider a ThreadStart to start the thread, such like "new ThreadStart(_ThreadProc)"
 		/// </summary>
 		/// <returns></returns>
@@ -122,6 +149,7 @@ namespace MFGLib
 		#region Private Members
 		private Thread m_thread = null;
 		private bool m_background = false;
+		private object m_lock = new object();
 		#endregion
 	}	
 
