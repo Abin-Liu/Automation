@@ -5,16 +5,52 @@ using System.Windows.Forms;
 
 namespace Win32API
 {
-	public enum ModKeys { None = 0, Shift = 0x01, Control = 0x02, Alt = 0x04 };
+	/// <summary>
+	/// Modifier keys
+	/// </summary>
+	public enum ModKeys
+	{
+		/// <summary>
+		/// No modifier
+		/// </summary>
+		None = 0,
 
+		/// <summary>
+		/// The SHIFT key is held down
+		/// </summary>
+		Shift = 0x01,
+
+		/// <summary>
+		/// The CONTROL key is held down
+		/// </summary>
+		Control = 0x02,
+
+		/// <summary>
+		/// The ALT key is held down
+		/// </summary>
+		Alt = 0x04
+	};
+
+	/// <summary>
+	/// A helper class for keyboard and mouse input simulation
+	/// </summary>
 	public class Input
 	{
+		/// <summary>
+		/// Move the mouse to a specified screen location
+		/// </summary>
+		/// <param name="x">X coords (relative to screen)</param>
+		/// <param name="y">Y coords (relative to screen)</param>
 		public static void MouseMove(int x, int y)
 		{
 			mouse_event(MOUSEEVENTF_MOVE, 5000, 5000, 0, 0);			
 			SetCursorPos(x, y);
 		}
 
+		/// <summary>
+		/// Press down a mouse button
+		/// </summary>
+		/// <param name="buttons">The button to be pressed</param>
 		public static void MouseDown(MouseButtons buttons)
 		{
 			if ((buttons & MouseButtons.Left) != 0)
@@ -33,6 +69,11 @@ namespace Win32API
 			}
 		}
 
+
+		/// <summary>
+		/// Release a mouse button
+		/// </summary>
+		/// <param name="buttons">The button to be released</param>
 		public static void MouseUp(MouseButtons buttons)
 		{
 			if ((buttons & MouseButtons.Left) != 0)
@@ -51,23 +92,38 @@ namespace Win32API
 			}
 		}
 
+		/// <summary>
+		/// Click a mouse button
+		/// </summary>
+		/// <param name="buttons">The button to be clicked</param>
 		public static void MouseClick(MouseButtons buttons)
 		{
 			MouseDown(buttons);
 			MouseUp(buttons);
 		}
 
+		/// <summary>
+		/// Double-click a mouse button
+		/// </summary>
+		/// <param name="buttons">The button to be clicked</param>
 		public static void MouseDblClick(MouseButtons buttons)
 		{
 			MouseClick(buttons);
 			MouseClick(buttons);
 		}
 
+		/// <summary>
+		/// Scroll the mouse wheel
+		/// </summary>
+		/// <param name="scrollUp">Scroll direction</param>
 		public static void MouseWheel(bool scrollUp)
 		{
 			mouse_event(MOUSEEVENTF_WHEEL, 0, 0, scrollUp ? 120 : -120, 0);
 		}
 
+		/// <summary>
+		/// Release all keys if held down
+		/// </summary>
 		public static void ReleaseAllKeys()
 		{
 			byte[] states = new byte[256];
@@ -86,6 +142,12 @@ namespace Win32API
 			}
 		}
 
+		/// <summary>
+		/// Remove redundant modifiers which already contained in key
+		/// </summary>
+		/// <param name="key">The key</param>
+		/// <param name="mods">Modifiers</param>
+		/// <returns></returns>
 		public static ModKeys RemoveRedundantMods(Keys key, ModKeys mods)
 		{
 			if (mods == ModKeys.None)
@@ -105,6 +167,11 @@ namespace Win32API
 			return mods;
 		}
 
+		/// <summary>
+		/// Press down a key
+		/// </summary>
+		/// <param name="key">The key to be pressed down</param>
+		/// <param name="mods">Modifiers</param>
 		public static void KeyDown(Keys key, ModKeys mods = ModKeys.None)
 		{
 			mods = RemoveRedundantMods(key, mods);
@@ -126,6 +193,11 @@ namespace Win32API
 			keybd_event((byte)key, 0, 0, 0);
 		}
 
+		/// <summary>
+		/// Release a key
+		/// </summary>
+		/// <param name="key">The key to be released</param>
+		/// <param name="mods">Modifiers</param>
 		public static void KeyUp(Keys key, ModKeys mods = ModKeys.None)
 		{
 			mods = RemoveRedundantMods(key, mods);
@@ -148,6 +220,11 @@ namespace Win32API
 			}
 		}
 
+		/// <summary>
+		/// Stroke a key
+		/// </summary>
+		/// <param name="key">The key to be stroked</param>
+		/// <param name="mods">Modifiers</param>
 		public static void KeyStroke(Keys key, ModKeys mods = ModKeys.None)
 		{
 			KeyDown(key, mods);
@@ -157,21 +234,31 @@ namespace Win32API
 		[DllImport("user32.dll")]
 		static extern int mouse_event(int flags, int x, int y, int buttons, int extraInfo);
 
-		const int MOUSEEVENTF_MOVE = 0x0001; //移动鼠标
-		const int MOUSEEVENTF_LEFTDOWN = 0x0002; //模拟鼠标左键按下
-		const int MOUSEEVENTF_LEFTUP = 0x0004; //模拟鼠标左键抬起
-		const int MOUSEEVENTF_RIGHTDOWN = 0x0008; //模拟鼠标右键按下
-		const int MOUSEEVENTF_RIGHTUP = 0x0010; //模拟鼠标右键抬起
-		const int MOUSEEVENTF_MIDDLEDOWN = 0x0020; //模拟鼠标中键按下 
-		const int MOUSEEVENTF_MIDDLEUP = 0x0040; //模拟鼠标中键抬起
-		const int MOUSEEVENTF_WHEEL = 0x800; //模拟鼠标滚轮
+		const int MOUSEEVENTF_MOVE = 0x0001;
+		const int MOUSEEVENTF_LEFTDOWN = 0x0002;
+		const int MOUSEEVENTF_LEFTUP = 0x0004;
+		const int MOUSEEVENTF_RIGHTDOWN = 0x0008;
+		const int MOUSEEVENTF_RIGHTUP = 0x0010;
+		const int MOUSEEVENTF_MIDDLEDOWN = 0x0020;
+		const int MOUSEEVENTF_MIDDLEUP = 0x0040;
+		const int MOUSEEVENTF_WHEEL = 0x800;
 
+		/// <summary>
+		/// Set cursor pos to specified screen location
+		/// </summary>
+		/// <param name="x">X coords (relative to screen)</param>
+		/// <param name="y">Y coords (relative to screen)</param>
+		/// <returns></returns>
 		[DllImport("user32.dll")]
 		public static extern int SetCursorPos(int x, int y);
 
 		[DllImport("user32.dll")]
 		static extern int GetCursorPos(out Point point);
 
+		/// <summary>
+		/// Retrieve the cursor location
+		/// </summary>
+		/// <returns>Return a Point struct contains X and Y coords relative to screen</returns>
 		public static Point GetCursorPos()
 		{
 			Point point = new Point(0, 0);
@@ -186,8 +273,13 @@ namespace Win32API
 		static extern void keybd_event(byte vkCode, byte scan, int flags, int extraInfo);
 
 		[DllImport("user32.dll")]
-		public static extern short GetAsyncKeyState(Keys key);
+		static extern short GetAsyncKeyState(Keys key);
 
+		/// <summary>
+		/// Chec k whether a specified key is currently held down
+		/// </summary>
+		/// <param name="key">The key</param>
+		/// <returns>Return true if the key is held down, false otherwise</returns>
 		public static bool IsKeyDown(Keys key)
 		{
 			return (GetAsyncKeyState(key) & 0x8000) != 0;

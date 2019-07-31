@@ -142,7 +142,7 @@ namespace Automation
 			m_thread.Paused = true;
 			if (Window.GetForegroundWindow() != this.Handle)
 			{
-				if (Window.IsIconic(this.Handle))
+				if (Window.IsMinimized(this.Handle))
 				{
 					Window.ShowWindow(this.Handle, Window.SW_RESTORE);
 				}
@@ -274,35 +274,28 @@ namespace Automation
 		/// </summary>
 		protected virtual void Form_OnClosing(object sender, FormClosingEventArgs e)
 		{
+			bool cancel = false;
 			if (m_thread.IsAlive)
 			{
 				// Display a confirmation is the thread is alive
-				e.Cancel = !Confirm("The thread is still running, exit anyway?");
-			}			
-		}
+				cancel = !Confirm("The thread is still running, exit anyway?");
+			}
+
+			// Cleanup before close
+			if (!cancel)
+			{
+				CleanupBeforeClose();
+			}
+
+			e.Cancel = cancel;
+		}		
 
 		/// <summary>
 		/// Inherited forms must call base.OnFormClosed(sender, e) in their Form_OnClosed
 		/// </summary>
 		protected virtual void Form_OnClosed(object sender, FormClosedEventArgs e)
 		{
-			// cleanup
-			foreach (int id in m_hotkeys)
-			{
-				Hotkey.UnregisterHotKey(this.Handle, id);
-			}
-
-			m_hotkeys.Clear();
-
-			if (m_bossModeWnd != IntPtr.Zero && !Window.IsWindowVisible(m_bossModeWnd))
-			{
-				Window.ShowWindow(m_bossModeWnd, Window.SW_SHOW);
-			}
-			m_bossModeWnd = IntPtr.Zero;			
-
-			m_thread.Stop();
-			m_thread.Alerting = false;
-			m_thread.Dispose();
+			CleanupBeforeClose();
 		}
 
 		/// <summary>
@@ -363,6 +356,34 @@ namespace Automation
 		private AutomationThread m_thread = null;
 		private List<int> m_hotkeys = new List<int>();
 		private IntPtr m_bossModeWnd = IntPtr.Zero;
+		private bool m_disposed = false;
+
+		protected virtual void CleanupBeforeClose()
+		{
+			if (m_disposed)
+			{
+				return;
+			}
+
+			// cleanup
+			foreach (int id in m_hotkeys)
+			{
+				Hotkey.UnregisterHotKey(this.Handle, id);
+			}
+
+			m_hotkeys.Clear();
+
+			if (m_bossModeWnd != IntPtr.Zero && !Window.IsWindowVisible(m_bossModeWnd))
+			{
+				Window.ShowWindow(m_bossModeWnd, Window.SW_SHOW);
+			}
+			m_bossModeWnd = IntPtr.Zero;
+
+			m_thread.Stop();
+			m_thread.Alerting = false;
+			m_thread.Dispose();
+			m_disposed = true;
+		}
 
 		private static int IntPtrToInt(IntPtr p)
 		{

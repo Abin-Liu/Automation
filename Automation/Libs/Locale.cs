@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace Automation
+namespace MFGLib
 {
 	/// <summary>
 	/// Key-value map for locale strings
@@ -66,14 +64,19 @@ namespace Automation
 		private Dictionary<string, string> m_map = new Dictionary<string, string>();		
 	}
 
+	/// <summary>
+	/// Locale collection
+	/// </summary>
 	public sealed class LocaleCollection
 	{
-
 		/// <summary>
 		/// Get system locale: en-US, zh-CN, zh-TW, etc
 		/// </summary>
-		public static string SystemLocale { get; } = System.Globalization.CultureInfo.InstalledUICulture.Name;
+		public static readonly string SystemLocale = System.Globalization.CultureInfo.InstalledUICulture.Name;
 
+		/// <summary>
+		/// Cobstructor
+		/// </summary>
 		public LocaleCollection()
 		{
 			Locale locale;
@@ -133,6 +136,6 @@ namespace Automation
 
 		// the underlying dictonary
 		private Dictionary<string, Locale> m_map = new Dictionary<string, Locale>();
-		private static readonly string LOCALE_DEFAULT = "en-US";
+		private static readonly string LOCALE_DEFAULT = "en-US"; // Default locale is English
 	}
 }

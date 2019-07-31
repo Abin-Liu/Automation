@@ -1,9 +1,16 @@
-﻿using System;
+﻿////////////////////////////////////////////////
+// MemDC
+//
+// Abin Liu
+// 2018-4-15
+////////////////////////////////////////////////
+
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Threading;
 
-namespace Automation
+namespace MFGLib
 {
 	/// <summary>
 	/// The GDI GetPixel method only suits for single pixel fetching, and will freeze 

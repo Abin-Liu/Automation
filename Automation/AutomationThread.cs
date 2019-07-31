@@ -298,7 +298,7 @@ namespace Automation
 			}
 
 			Window.ShowWindow(TargetWnd, Window.SW_SHOW);
-			if (Window.IsIconic(TargetWnd))
+			if (Window.IsMinimized(TargetWnd))
 			{
 				Window.ShowWindow(TargetWnd, Window.SW_RESTORE);
 			}
