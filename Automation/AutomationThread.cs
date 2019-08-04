@@ -469,7 +469,21 @@ namespace Automation
 		{
 			Point offset = ClientToScreen;
 			Input.SetCursorPos(x + offset.X, y + offset.Y);
-		}		
+		}
+
+		/// <summary>
+		/// Drag the mouse from one position to another
+		/// </summary>
+		/// <param name="x1">X coords of the start position</param>
+		/// <param name="y1">Y coords of the start position</param>
+		/// <param name="x2">X coords of the end position</param>
+		/// <param name="y2">Y coords of the end position</param>
+		/// <param name="button">The button to be held down</param>
+		public void MouseDrag(int x1, int y1, int x2, int y2, MouseButtons button = MouseButtons.Left)
+		{
+			Point offset = ClientToScreen;
+			Input.MouseDrag(x1 + offset.X, y1 + offset.Y, x2 + offset.X, y2 + offset.Y, button);
+		}
 
 		/// <summary> 
 		/// Press down a mouse button

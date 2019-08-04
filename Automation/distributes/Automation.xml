@@ -427,6 +427,16 @@
             <param name="y">Client y coords</param> 
             </summary>
         </member>
+        <member name="M:Automation.AutomationThread.MouseDrag(System.Int32,System.Int32,System.Int32,System.Int32,System.Windows.Forms.MouseButtons)">
+            <summary>
+            Drag the mouse from one position to another
+            </summary>
+            <param name="x1">X coords of the start position</param>
+            <param name="y1">Y coords of the start position</param>
+            <param name="x2">X coords of the end position</param>
+            <param name="y2">Y coords of the end position</param>
+            <param name="button">The button to be held down</param>
+        </member>
         <member name="M:Automation.AutomationThread.MouseDown(System.Windows.Forms.MouseButtons)">
             <summary> 
             Press down a mouse button
@@ -917,29 +927,39 @@
             <param name="x">X coords (relative to screen)</param>
             <param name="y">Y coords (relative to screen)</param>
         </member>
+        <member name="M:Win32API.Input.MouseDrag(System.Int32,System.Int32,System.Int32,System.Int32,System.Windows.Forms.MouseButtons)">
+            <summary>
+            Drag the mouse from one position to another
+            </summary>
+            <param name="x1">X coords of the start position</param>
+            <param name="y1">Y coords of the start position</param>
+            <param name="x2">X coords of the end position</param>
+            <param name="y2">Y coords of the end position</param>
+            <param name="button">The button to be held down</param>
+        </member>
         <member name="M:Win32API.Input.MouseDown(System.Windows.Forms.MouseButtons)">
             <summary>
             Press down a mouse button
             </summary>
-            <param name="buttons">The button to be pressed</param>
+            <param name="button">The button to be pressed</param>
         </member>
         <member name="M:Win32API.Input.MouseUp(System.Windows.Forms.MouseButtons)">
             <summary>
             Release a mouse button
             </summary>
-            <param name="buttons">The button to be released</param>
+            <param name="button">The button to be released</param>
         </member>
         <member name="M:Win32API.Input.MouseClick(System.Windows.Forms.MouseButtons)">
             <summary>
             Click a mouse button
             </summary>
-            <param name="buttons">The button to be clicked</param>
+            <param name="button">The button to be clicked</param>
         </member>
         <member name="M:Win32API.Input.MouseDblClick(System.Windows.Forms.MouseButtons)">
             <summary>
             Double-click a mouse button
             </summary>
-            <param name="buttons">The button to be clicked</param>
+            <param name="button">The button to be clicked</param>
         </member>
         <member name="M:Win32API.Input.MouseWheel(System.Boolean)">
             <summary>
