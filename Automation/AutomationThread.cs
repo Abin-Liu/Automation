@@ -467,9 +467,9 @@ namespace Automation
 		/// </summary>
 		public void MouseMove(int x, int y)
 		{
-			Point point = TranslateLocation(x, y);
-			Input.MouseMove(point.X, point.Y);
-		}
+			Point offset = ClientToScreen;
+			Input.SetCursorPos(x + offset.X, y + offset.Y);
+		}		
 
 		/// <summary> 
 		/// Press down a mouse button

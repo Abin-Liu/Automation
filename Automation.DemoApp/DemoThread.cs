@@ -29,7 +29,7 @@ namespace Automation.DemoApp
 			DelayBeforeAction(500);
 			MouseMove(96, 56);
 			DelayBeforeAction(800);
-			MouseClick(96, 56);
+			MouseClick(96, 56);			
 		}
 
 		private static readonly string TEST_CONTENTS = "Do not go gentle into that good night,\nOld age should burn and rave at close of day,\nRage, rage against the dying of the light.";

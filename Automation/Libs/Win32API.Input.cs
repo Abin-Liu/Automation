@@ -43,9 +43,8 @@ namespace Win32API
 		/// <param name="y">Y coords (relative to screen)</param>
 		public static void MouseMove(int x, int y)
 		{
-			mouse_event(MOUSEEVENTF_MOVE, 5000, 5000, 0, 0);			
 			SetCursorPos(x, y);
-		}
+		}		
 
 		/// <summary>
 		/// Press down a mouse button
@@ -242,6 +241,7 @@ namespace Win32API
 		const int MOUSEEVENTF_MIDDLEDOWN = 0x0020;
 		const int MOUSEEVENTF_MIDDLEUP = 0x0040;
 		const int MOUSEEVENTF_WHEEL = 0x800;
+		const int MOUSEEVENTF_ABSOLUTE = 0x8000;
 
 		/// <summary>
 		/// Set cursor pos to specified screen location

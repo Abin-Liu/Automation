@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using Automation;
 using Win32API;
+using MFGLib;
 
 namespace Automation.DemoApp
 {
