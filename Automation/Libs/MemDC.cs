@@ -19,7 +19,7 @@ namespace MFGLib
 	/// improves the performance by hundreds times. It can also capture pixels of directX
 	/// windows.
 	/// </summary>
-	public class MemDC
+	public class MemDC : IDisposable
 	{
 		/// <summary>
 		/// Represents an invalid color value
@@ -29,7 +29,36 @@ namespace MFGLib
 		/// <summary>
 		/// The underlying Bitmap object
 		/// </summary>
-		public Bitmap Bitmap { get; private set; } = null;		
+		public Bitmap Bitmap { get; private set; } = null;
+
+		private Graphics m_graph = null; // The underlysing Graphics object
+
+		/// <summary>
+		/// Dispose the object
+		/// </summary>
+		public virtual void Dispose()
+		{
+			Cleanup();
+			GC.SuppressFinalize(this);
+		}
+
+		/// <summary>
+		/// Free resource
+		/// </summary>
+		public virtual void Cleanup()
+		{
+			if (m_graph != null)
+			{
+				m_graph.Dispose();
+				m_graph = null;
+			}
+
+			if (Bitmap != null)
+			{
+				Bitmap.Dispose();
+				Bitmap = null;
+			}
+		}
 
 		/// <summary>
 		/// Capture a block of pixels from screen to memory
@@ -60,15 +89,16 @@ namespace MFGLib
 			{
 				if (Bitmap == null || Bitmap.Width != width || Bitmap.Height != height)
 				{
+					Cleanup();
 					Bitmap = new Bitmap(width, height);
+					m_graph = Graphics.FromImage(Bitmap);
 				}
 
 				x = Math.Max(x, 0);
 				y = Math.Max(y, 0);
 
 				// copy from screen
-				Graphics graph = Graphics.FromImage(Bitmap);
-				graph.CopyFromScreen(x, y, 0, 0, new Size(width, height));
+				m_graph.CopyFromScreen(x, y, 0, 0, new Size(width, height));
 				return true;
 			}
 			catch (ThreadAbortException e)
@@ -159,6 +189,58 @@ namespace MFGLib
 			}
 
 			return true;
+		}
+
+		/// <summary>
+		/// Keeps checking whether there's at least a pixel within the boundary in the target window matches specified RGB values
+		/// </summary>
+		/// <param name="x">X coords of screen</param>
+		/// <param name="y">Y coords of screen</param>
+		/// <param name="color">The RGB value</param>
+		/// <param name="timeout">Maximum milliseconds before timeout, 0 to check infinitely</param>
+		/// <param name="tolerance">Maximum tolerence</param>
+		/// <param name="radius">Maximum radius of the boundary the pixel could be found</param>
+		/// <param name="sleep">Sleep the running thread between two checks, in millisecond (minimum is 100ms)</param>
+		/// <returns>Return true if the pixel matches before timeout, false otherwise</returns>
+		public virtual bool WaitForTolerantPixel(int x, int y, int color, int timeout, byte tolerance, int radius = 0, int sleep = 200)
+		{
+			sleep = Math.Max(sleep, 100);
+			DateTime start = DateTime.Now;
+
+			if (radius < 1)
+			{
+				radius = 1;
+			}
+
+			int range = radius * 2;
+			while (Capture(x - radius, y - radius, range, range))
+			{
+				for (int i = 0; i < range; i++)
+				{
+					for (int j = 0; j < range; j++)
+					{
+						int pixel = GetPixel(i, j);
+						if (pixel == COLOR_INVALID)
+						{
+							continue;
+						}
+
+						if (CompareColors(pixel, color, tolerance))
+						{
+							return true;
+						}
+					}
+				}
+
+				if (timeout > 0 && (DateTime.Now - start).TotalMilliseconds > timeout)
+				{
+					return false;
+				}
+
+				Thread.Sleep(sleep);
+			}
+
+			return false;
 		}
 
 		/// <summary> 
@@ -267,6 +349,25 @@ namespace MFGLib
 		public static byte GetBValue(int color)
 		{
 			return (byte)color;
+		}
+
+		/// <summary>
+		/// Compare 2 colors with tolerance
+		/// </summary>
+		/// <param name="color1">The first color</param>
+		/// <param name="color2">The second color</param>
+		/// <param name="tolerance">Maximum tolerence</param>
+		/// <returns>Return true if the differences between 2 colors are within the specified tolerence value, return false otherwise</returns>
+		public static bool CompareColors(int color1, int color2, byte tolerance)
+		{
+			if (tolerance == 0)
+			{
+				return color1 == color2;
+			}
+
+			return Math.Abs((int)GetRValue(color1) - (int)GetRValue(color2)) <= (int)tolerance
+				&& Math.Abs((int)GetGValue(color1) - (int)GetGValue(color2)) <= (int)tolerance
+				&& Math.Abs((int)GetBValue(color1) - (int)GetBValue(color2)) <= (int)tolerance;
 		}
 	}
 }
