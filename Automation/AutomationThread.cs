@@ -345,24 +345,7 @@ namespace Automation
 		{
 			MemDC dc = new MemDC();
 			return dc.WaitForPixel(x + ClientToScreen.X, y + ClientToScreen.Y, color, timeout, sleep);			
-		}
-
-		/// <summary>
-		/// Keeps checking whether there's at least a pixel within the boundary in the target window matches specified RGB values
-		/// </summary>
-		/// <param name="x">X coords of screen</param>
-		/// <param name="y">Y coords of screen</param>
-		/// <param name="color">The RGB value</param>
-		/// <param name="timeout">Maximum milliseconds before timeout, 0 to check infinitely</param>
-		/// <param name="tolerance">Maximum tolerence</param>
-		/// <param name="radius">Maximum radius of the boundary the pixel could be found</param>
-		/// <param name="sleep">Sleep the running thread between two checks, in millisecond (minimum is 100ms)</param>
-		/// <returns>Return true if the pixel matches before timeout, false otherwise</returns>
-		public virtual bool WaitForTolerantPixel(int x, int y, int color, int timeout, byte tolerance, int radius = 0, int sleep = 200)
-		{
-			MemDC dc = new MemDC();
-			return dc.WaitForTolerantPixel(x, y, color, timeout, tolerance, radius, sleep);
-		}
+		}		
 
 		/// <summary>
 		/// Compose rgb values into an integer

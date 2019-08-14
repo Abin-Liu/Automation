@@ -189,59 +189,7 @@ namespace MFGLib
 			}
 
 			return true;
-		}
-
-		/// <summary>
-		/// Keeps checking whether there's at least a pixel within the boundary in the target window matches specified RGB values
-		/// </summary>
-		/// <param name="x">X coords of screen</param>
-		/// <param name="y">Y coords of screen</param>
-		/// <param name="color">The RGB value</param>
-		/// <param name="timeout">Maximum milliseconds before timeout, 0 to check infinitely</param>
-		/// <param name="tolerance">Maximum tolerence</param>
-		/// <param name="radius">Maximum radius of the boundary the pixel could be found</param>
-		/// <param name="sleep">Sleep the running thread between two checks, in millisecond (minimum is 100ms)</param>
-		/// <returns>Return true if the pixel matches before timeout, false otherwise</returns>
-		public virtual bool WaitForTolerantPixel(int x, int y, int color, int timeout, byte tolerance, int radius = 0, int sleep = 200)
-		{
-			sleep = Math.Max(sleep, 100);
-			DateTime start = DateTime.Now;
-
-			if (radius < 1)
-			{
-				radius = 1;
-			}
-
-			int range = radius * 2;
-			while (Capture(x - radius, y - radius, range, range))
-			{
-				for (int i = 0; i < range; i++)
-				{
-					for (int j = 0; j < range; j++)
-					{
-						int pixel = GetPixel(i, j);
-						if (pixel == COLOR_INVALID)
-						{
-							continue;
-						}
-
-						if (CompareColors(pixel, color, tolerance))
-						{
-							return true;
-						}
-					}
-				}
-
-				if (timeout > 0 && (DateTime.Now - start).TotalMilliseconds > timeout)
-				{
-					return false;
-				}
-
-				Thread.Sleep(sleep);
-			}
-
-			return false;
-		}
+		}		
 
 		/// <summary> 
 		/// Save the memory block to a file, image formats are automatically determined by file extension.
