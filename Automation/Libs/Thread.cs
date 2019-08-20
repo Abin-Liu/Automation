@@ -87,6 +87,32 @@ namespace MFGLib
 		}
 
 		/// <summary>
+		/// Blocks the calling thread until the thread represented by this instance terminates or the specified time elapses
+		/// </summary>
+		public virtual void Join()
+		{
+			if (IsAlive)
+			{
+				m_thread.Join();
+			}
+		}
+
+		/// <summary>
+		/// Blocks the calling thread until the thread represented by this instance terminates or the specified time elapses
+		/// </summary>
+		/// <param name="millisecondsTimeout">The number of milliseconds to wait for the thread to terminate.</param>
+		/// <returns>Return true if the thread has terminated before timeout, false otherwise</returns>
+		public virtual bool Join(int millisecondsTimeout)
+		{
+			if (IsAlive)
+			{
+				return m_thread.Join(millisecondsTimeout);
+			}
+
+			return true;
+		}
+
+		/// <summary>
 		/// Lock an object
 		/// </summary>
 		/// <param name="target">Object to be marked exclusive</param>
@@ -111,34 +137,7 @@ namespace MFGLib
 		public void Sleep(int milliseconds)
 		{
 			Thread.Sleep(milliseconds);
-		}
-
-		/// <summary>
-		/// Wait for a thread to stop, the function only return after the thread stops or timeout occurred.
-		/// </summary>
-		/// <param name="thread">The target thread to be waited.</param>
-		/// <param name="timeout">Timeout in milliseconds, 0 means infinite.</param>
-		/// <returns></returns>
-		public static bool WaitForSingleObject(GenericThread thread, int timeout = 0)
-		{
-			if (thread == null)
-			{
-				return true;
-			}
-
-			DateTime start = DateTime.Now;
-			while (thread.IsAlive)
-			{
-				if (timeout > 0 && (DateTime.Now - start).TotalMilliseconds > timeout)
-				{
-					return false;
-				}
-
-				Thread.Sleep(100);
-			}
-
-			return true;
-		}
+		}		
 
 		/// <summary>
 		/// Abstract member to be overridden, derived classes must provider a ThreadStart to start the thread, such like "new ThreadStart(_ThreadProc)"

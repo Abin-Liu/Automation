@@ -10,7 +10,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Threading;
 
-namespace MFGLib
+namespace Automation
 {
 	/// <summary>
 	/// The GDI GetPixel method only suits for single pixel fetching, and will freeze 
@@ -297,25 +297,6 @@ namespace MFGLib
 		public static byte GetBValue(int color)
 		{
 			return (byte)color;
-		}
-
-		/// <summary>
-		/// Compare 2 colors with tolerance
-		/// </summary>
-		/// <param name="color1">The first color</param>
-		/// <param name="color2">The second color</param>
-		/// <param name="tolerance">Maximum tolerence</param>
-		/// <returns>Return true if the differences between 2 colors are within the specified tolerence value, return false otherwise</returns>
-		public static bool CompareColors(int color1, int color2, byte tolerance)
-		{
-			if (tolerance == 0)
-			{
-				return color1 == color2;
-			}
-
-			return Math.Abs((int)GetRValue(color1) - (int)GetRValue(color2)) <= (int)tolerance
-				&& Math.Abs((int)GetGValue(color1) - (int)GetGValue(color2)) <= (int)tolerance
-				&& Math.Abs((int)GetBValue(color1) - (int)GetBValue(color2)) <= (int)tolerance;
-		}
+		}		
 	}
 }
