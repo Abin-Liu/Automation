@@ -42,9 +42,6 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Win32API">
-      <HintPath>..\..\Win32API\Win32API\Distributes\Win32API.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutomationForm.cs">
@@ -52,6 +49,9 @@
     </Compile>
     <Compile Include="AutomationThread.cs" />
     <Compile Include="Libs\Locale.cs" />
+    <Compile Include="Libs\Win32API.Hotkey.cs" />
+    <Compile Include="Libs\Win32API.Input.cs" />
+    <Compile Include="Libs\Win32API.Window.cs" />
     <Compile Include="MemDC.cs" />
     <Compile Include="Libs\Thread.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
