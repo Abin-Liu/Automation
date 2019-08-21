@@ -525,12 +525,27 @@
         </member>
         <member name="F:Automation.MemDC.COLOR_INVALID">
             <summary>
-            Represents an invalid color value
+            Represents an invalid color value, 0xffffffff in Win32
             </summary>
         </member>
         <member name="P:Automation.MemDC.Bitmap">
             <summary>
             The underlying Bitmap object
+            </summary>
+        </member>
+        <member name="P:Automation.MemDC.Valid">
+            <summary>
+            Checks whether the object is valid
+            </summary>
+        </member>
+        <member name="P:Automation.MemDC.Width">
+            <summary>
+            Width of the underlying bitmap
+            </summary>
+        </member>
+        <member name="P:Automation.MemDC.Height">
+            <summary>
+            Height of the underlying bitmap
             </summary>
         </member>
         <member name="M:Automation.MemDC.Dispose">
@@ -586,6 +601,25 @@
             <param name="sleep">Sleep the running thread between two checks, in millisecond (minimum is 100ms) </param>
             <returns>Return true if the pixel matches before timeout, false otherwise</returns>
             </summary>
+        </member>
+        <member name="T:Automation.MemDC.ScanPixelDelegate">
+            <summary>
+            Delegate used for pixel scanning
+            </summary>
+            <param name="x">The x coords relative to bitmap</param>
+            <param name="y">The y coords relative to bitmap</param>
+            <param name="pixel">RGB value of the pixel at (x,y)</param>
+            <param name="parameter">Callback parameter</param>
+            <returns>Return true to abort the scanning, false to proceed with next pixel</returns>
+        </member>
+        <member name="M:Automation.MemDC.ScanPixels(Automation.MemDC.ScanPixelDelegate,System.Object,System.Int32)">
+            <summary>
+            Scan pixels
+            </summary>
+            <param name="callback">Callback function</param>
+            <param name="parameter">Callback parameter</param>
+            <param name="interlace">Scanning interlace for both horizontal and vertical, 0 means scan every pixel</param>
+            <returns>Returns true if the last callback returned true, or false if all pixels have been scanned</returns>
         </member>
         <member name="M:Automation.MemDC.Save(System.String)">
             <summary> 

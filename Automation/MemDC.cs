@@ -22,16 +22,29 @@ namespace Automation
 	public class MemDC : IDisposable
 	{
 		/// <summary>
-		/// Represents an invalid color value
+		/// Represents an invalid color value, 0xffffffff in Win32
 		/// </summary>
-		public static readonly int COLOR_INVALID = 0;		
+		public const int COLOR_INVALID = -1;
 
 		/// <summary>
 		/// The underlying Bitmap object
 		/// </summary>
 		public Bitmap Bitmap { get; private set; } = null;
 
-		private Graphics m_graph = null; // The underlysing Graphics object
+		/// <summary>
+		/// Checks whether the object is valid
+		/// </summary>
+		public bool Valid { get { return m_graph != null; } }
+
+		/// <summary>
+		/// Width of the underlying bitmap
+		/// </summary>
+		public int Width { get { return Bitmap == null ? 0 : Bitmap.Width; } }
+
+		/// <summary>
+		/// Height of the underlying bitmap
+		/// </summary>
+		public int Height { get { return Bitmap == null ? 0 : Bitmap.Height; } }		
 
 		/// <summary>
 		/// Dispose the object
@@ -189,7 +202,60 @@ namespace Automation
 			}
 
 			return true;
-		}		
+		}
+
+		/// <summary>
+		/// Delegate used for pixel scanning
+		/// </summary>
+		/// <param name="x">The x coords relative to bitmap</param>
+		/// <param name="y">The y coords relative to bitmap</param>
+		/// <param name="pixel">RGB value of the pixel at (x,y)</param>
+		/// <param name="parameter">Callback parameter</param>
+		/// <returns>Return true to abort the scanning, false to proceed with next pixel</returns>
+		public delegate bool ScanPixelDelegate(int x, int y, int pixel, object parameter);
+
+		/// <summary>
+		/// Scan pixels
+		/// </summary>
+		/// <param name="callback">Callback function</param>
+		/// <param name="parameter">Callback parameter</param>
+		/// <param name="interlace">Scanning interlace for both horizontal and vertical, 0 means scan every pixel</param>
+		/// <returns>Returns true if the last callback returned true, or false if all pixels have been scanned</returns>
+		public bool ScanPixels(ScanPixelDelegate callback, object parameter = null, int interlace = 0)
+		{
+			if (callback == null)
+			{
+				throw new ArgumentNullException("callback");
+			}
+
+			if (!Valid)
+			{
+				throw new NullReferenceException("Bitmap not captured yet.");
+			}
+
+			if (interlace < 0)
+			{
+				interlace = 0;
+			}
+
+			int width = Width;
+			int height = Height;
+			interlace++;
+
+			for (int x = 0; x < width; x += interlace)
+			{
+				for (int y = 0; y < height; y += interlace)
+				{
+					int pixel = GetPixel(x, y);
+					if (callback(x, y, pixel, parameter))
+					{
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
 
 		/// <summary> 
 		/// Save the memory block to a file, image formats are automatically determined by file extension.
@@ -297,6 +363,9 @@ namespace Automation
 		public static byte GetBValue(int color)
 		{
 			return (byte)color;
-		}		
+		}
+
+		// Private members
+		private Graphics m_graph = null; // The underlysing Graphics object
 	}
 }
