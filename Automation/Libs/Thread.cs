@@ -3,6 +3,9 @@ using System.Threading;
 
 namespace MFGLib
 {
+	/// <summary>
+	/// Abstract base class
+	/// </summary>
 	public abstract class GenericThread : IDisposable
 	{
 		/// <summary>
@@ -152,6 +155,9 @@ namespace MFGLib
 		#endregion
 	}	
 
+	/// <summary>
+	/// A worker thread
+	/// </summary>
 	public abstract class WorkerThread : GenericThread
 	{
 		/// <summary>
@@ -204,6 +210,9 @@ namespace MFGLib
 		}		
 	}
 
+	/// <summary>
+	/// A ticker thread
+	/// </summary>
 	public abstract class TickThread : WorkerThread
 	{
 		/// <summary>
@@ -239,6 +248,9 @@ namespace MFGLib
 		}
 	}	
 	
+	/// <summary>
+	///  An event thread
+	/// </summary>
 	public class EventThread : GenericThread
 	{
 		/// <summary>
@@ -256,6 +268,10 @@ namespace MFGLib
 		/// </summary>
 		public EventThreadHandler ThreadProc { get; set; }
 
+		/// <summary>
+		/// Obtain the4 worker proc function
+		/// </summary>
+		/// <returns></returns>
 		protected override ThreadStart GetWorkerProc()
 		{
 			return new ThreadStart(_ThreadProc);
@@ -283,6 +299,9 @@ namespace MFGLib
 		}		
 	}
 	
+	/// <summary>
+	/// An event ticker thread
+	/// </summary>
 	public class TickEventThread : EventThread
 	{
 		/// <summary>

@@ -36,7 +36,7 @@
         </member>
         <member name="P:Automation.AutomationForm.HideForm">
             <summary>
-            Whether hide main form (using a notification ion?)
+            Whether hide main form (using a notification icon?)
             </summary>
         </member>
         <member name="M:Automation.AutomationForm.SetThread(Automation.AutomationThread)">
@@ -525,12 +525,27 @@
         </member>
         <member name="F:Automation.MemDC.COLOR_INVALID">
             <summary>
-            Represents an invalid color value
+            Represents an invalid color value, 0xffffffff in Win32
             </summary>
         </member>
         <member name="P:Automation.MemDC.Bitmap">
             <summary>
             The underlying Bitmap object
+            </summary>
+        </member>
+        <member name="P:Automation.MemDC.Valid">
+            <summary>
+            Checks whether the object is valid
+            </summary>
+        </member>
+        <member name="P:Automation.MemDC.Width">
+            <summary>
+            Width of the underlying bitmap
+            </summary>
+        </member>
+        <member name="P:Automation.MemDC.Height">
+            <summary>
+            Height of the underlying bitmap
             </summary>
         </member>
         <member name="M:Automation.MemDC.Dispose">
@@ -586,6 +601,25 @@
             <param name="sleep">Sleep the running thread between two checks, in millisecond (minimum is 100ms) </param>
             <returns>Return true if the pixel matches before timeout, false otherwise</returns>
             </summary>
+        </member>
+        <member name="T:Automation.MemDC.ScanPixelDelegate">
+            <summary>
+            Delegate used for pixel scanning
+            </summary>
+            <param name="x">The x coords relative to bitmap</param>
+            <param name="y">The y coords relative to bitmap</param>
+            <param name="pixel">RGB value of the pixel at (x,y)</param>
+            <param name="parameter">Callback parameter</param>
+            <returns>Return true to abort the scanning, false to proceed with next pixel</returns>
+        </member>
+        <member name="M:Automation.MemDC.ScanPixels(Automation.MemDC.ScanPixelDelegate,System.Object,System.Int32)">
+            <summary>
+            Scan pixels
+            </summary>
+            <param name="callback">Callback function</param>
+            <param name="parameter">Callback parameter</param>
+            <param name="interlace">Scanning interlace for both horizontal and vertical, 0 means scan every pixel</param>
+            <returns>Returns true if the last callback returned true, or false if all pixels have been scanned</returns>
         </member>
         <member name="M:Automation.MemDC.Save(System.String)">
             <summary> 
@@ -700,6 +734,11 @@
             <returns>The locale object</returns>
             </summary>
         </member>
+        <member name="T:MFGLib.GenericThread">
+            <summary>
+            Abstract base class
+            </summary>
+        </member>
         <member name="P:MFGLib.GenericThread.IsAlive">
             <summary>
             Check whether the thread is alive
@@ -776,6 +815,11 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="T:MFGLib.WorkerThread">
+            <summary>
+            A worker thread
+            </summary>
+        </member>
         <member name="M:MFGLib.WorkerThread.OnStart">
             <summary>
             Called when the thread starts
@@ -802,6 +846,11 @@
             Internal thread process
             </summary>
         </member>
+        <member name="T:MFGLib.TickThread">
+            <summary>
+            A ticker thread
+            </summary>
+        </member>
         <member name="P:MFGLib.TickThread.Interval">
             <summary>
             Interval between every 2 ticks, in milliseconds, default is 200 ms. Only set upon starting to ensure thread safe
@@ -823,6 +872,11 @@
             Thread working function
             </summary>
         </member>
+        <member name="T:MFGLib.EventThread">
+            <summary>
+             An event thread
+            </summary>
+        </member>
         <member name="P:MFGLib.EventThread.OnStart">
             <summary>
             Called when the thread starts
@@ -838,9 +892,20 @@
             Thread working function
             </summary>
         </member>
+        <member name="M:MFGLib.EventThread.GetWorkerProc">
+            <summary>
+            Obtain the4 worker proc function
+            </summary>
+            <returns></returns>
+        </member>
         <member name="M:MFGLib.EventThread._ThreadProc">
             <summary>
             Internal thread process
+            </summary>
+        </member>
+        <member name="T:MFGLib.TickEventThread">
+            <summary>
+            An event ticker thread
             </summary>
         </member>
         <member name="P:MFGLib.TickEventThread.OnTick">

@@ -36,7 +36,7 @@
         </member>
         <member name="P:Automation.AutomationForm.HideForm">
             <summary>
-            Whether hide main form (using a notification ion?)
+            Whether hide main form (using a notification icon?)
             </summary>
         </member>
         <member name="M:Automation.AutomationForm.SetThread(Automation.AutomationThread)">
@@ -734,6 +734,11 @@
             <returns>The locale object</returns>
             </summary>
         </member>
+        <member name="T:MFGLib.GenericThread">
+            <summary>
+            Abstract base class
+            </summary>
+        </member>
         <member name="P:MFGLib.GenericThread.IsAlive">
             <summary>
             Check whether the thread is alive
@@ -810,6 +815,11 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="T:MFGLib.WorkerThread">
+            <summary>
+            A worker thread
+            </summary>
+        </member>
         <member name="M:MFGLib.WorkerThread.OnStart">
             <summary>
             Called when the thread starts
@@ -836,6 +846,11 @@
             Internal thread process
             </summary>
         </member>
+        <member name="T:MFGLib.TickThread">
+            <summary>
+            A ticker thread
+            </summary>
+        </member>
         <member name="P:MFGLib.TickThread.Interval">
             <summary>
             Interval between every 2 ticks, in milliseconds, default is 200 ms. Only set upon starting to ensure thread safe
@@ -857,6 +872,11 @@
             Thread working function
             </summary>
         </member>
+        <member name="T:MFGLib.EventThread">
+            <summary>
+             An event thread
+            </summary>
+        </member>
         <member name="P:MFGLib.EventThread.OnStart">
             <summary>
             Called when the thread starts
@@ -872,9 +892,20 @@
             Thread working function
             </summary>
         </member>
+        <member name="M:MFGLib.EventThread.GetWorkerProc">
+            <summary>
+            Obtain the4 worker proc function
+            </summary>
+            <returns></returns>
+        </member>
         <member name="M:MFGLib.EventThread._ThreadProc">
             <summary>
             Internal thread process
+            </summary>
+        </member>
+        <member name="T:MFGLib.TickEventThread">
+            <summary>
+            An event ticker thread
             </summary>
         </member>
         <member name="P:MFGLib.TickEventThread.OnTick">

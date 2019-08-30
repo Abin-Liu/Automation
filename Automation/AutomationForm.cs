@@ -64,7 +64,7 @@ namespace Automation
 		public int ThreadTickInterval { get; set; } = 1000;
 
 		/// <summary>
-		/// Whether hide main form (using a notification ion?)
+		/// Whether hide main form (using a notification icon?)
 		/// </summary>
 		public bool HideForm { get; set; } = false;
 
