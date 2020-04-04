@@ -327,9 +327,8 @@ namespace Automation
 		/// <returns>Return RGB value if success, 0 otherwise.</returns>
 		/// </summary>
 		public int GetPixel(int x, int y)
-		{
-			MemDC dc = new MemDC();
-			return dc.CaptureAndGetPixel(x + ClientToScreen.X, y + ClientToScreen.Y);			
+		{			
+			return m_dc.CaptureAndGetPixel(x + ClientToScreen.X, y + ClientToScreen.Y);			
 		}
 
 		/// <summary> 
@@ -343,8 +342,7 @@ namespace Automation
 		/// </summary>
 		public virtual bool WaitForPixel(int x, int y, int color, int timeout, int sleep = 200)
 		{
-			MemDC dc = new MemDC();
-			return dc.WaitForPixel(x + ClientToScreen.X, y + ClientToScreen.Y, color, timeout, sleep);			
+			return m_dc.WaitForPixel(x + ClientToScreen.X, y + ClientToScreen.Y, color, timeout, sleep);			
 		}		
 
 		/// <summary>
@@ -659,7 +657,7 @@ namespace Automation
 		/// Dispose the object
 		/// </summary>
 		public virtual void Dispose()
-		{
+		{			
 			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
@@ -675,6 +673,7 @@ namespace Automation
 				if (disposing)
 				{
 					Alerting = false;
+					m_dc.Dispose();
 					m_ticker.Dispose();
 					m_thread.Dispose();
 					m_soundPlayerStart.Dispose();
@@ -706,11 +705,12 @@ namespace Automation
 		private static LocaleCollection m_locales = new LocaleCollection();
 		private EventThread m_thread = new EventThread();
 		private TickEventThread m_ticker = new TickEventThread();
+		private MemDC m_dc = new MemDC();
 		private bool m_alerting = false; // Sound alarm on?
 		private IntPtr m_messageWnd = IntPtr.Zero;
 		private SoundPlayer m_soundPlayerStart = new SoundPlayer(Resources.ResourceManager.GetStream("Start"));
 		private SoundPlayer m_soundPlayerStop = new SoundPlayer(Resources.ResourceManager.GetStream("Stop"));
-		private SoundPlayer m_soundPlayerAlert = new SoundPlayer(Resources.ResourceManager.GetStream("Alert"));
+		private SoundPlayer m_soundPlayerAlert = new SoundPlayer(Resources.ResourceManager.GetStream("Alert"));		
 		private bool m_disposed = false;
 
 		private bool _NeedPauseThreads()
