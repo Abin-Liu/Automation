@@ -203,7 +203,7 @@ namespace Automation
 		/// <param name="key">Key value</param>
 		/// <param name="modifiers">Modifiers（Ctrl, Alt, Shift）, can be combined with | operator</param>
 		/// <returns>Return true if success, false otherwise.</returns>
-		public bool RegisterMainKey(Keys key, ModKeys modifiers = ModKeys.None)
+		public bool RegisterMainKey(Keys key, Keys modifiers = Keys.None)
 		{
 			UnregisterMainKey();
 			return RegisterHotKey(HOTKEY_ID_PAUSE, key, modifiers);
@@ -224,7 +224,7 @@ namespace Automation
 		/// <param name="mods">Modifiers（Ctrl, Alt, Shift）, can be combined with | operator</param>
 		/// <returns>Return true if success, false otherwise.</returns>
 		/// </summary>
-		protected bool RegisterHotKey(int id, Keys key, ModKeys mods = ModKeys.None)
+		protected bool RegisterHotKey(int id, Keys key, Keys mods = Keys.None)
 		{
 			if (m_hotkeys.IndexOf(id) != -1)
 			{
@@ -263,7 +263,7 @@ namespace Automation
 				this.ShowInTaskbar = false;
 			}			
 
-			if (RegisterBossMode && !RegisterHotKey(HOTKEY_ID_BOSSMODE, Keys.B, ModKeys.Control | ModKeys.Alt))
+			if (RegisterBossMode && !RegisterHotKey(HOTKEY_ID_BOSSMODE, Keys.B, Keys.Control | Keys.Alt))
 			{
 				Message("Failed to register the {Ctrl-Alt-B} key.");
 			}

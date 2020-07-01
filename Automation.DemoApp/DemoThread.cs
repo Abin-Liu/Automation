@@ -15,13 +15,13 @@ namespace Automation.DemoApp
 		protected override void ThreadProc()
 		{
 			// Clear texts
-			KeyStroke(Keys.A, ModKeys.Control);
+			KeyStroke(Keys.A, Keys.Control);
 			DelayBeforeAction(600);
 			KeyStroke(Keys.Back);
 			DelayBeforeAction(600);
 
-			// Input at 10 speed of 10 chars per second
-			SendString(TEST_CONTENTS, 100);
+			// Input at 10 speed of 10 chars per second			
+			KeyStroke(TEST_CONTENTS, 100);
 
 			// Click the save menu
 			DelayBeforeAction(500);
@@ -32,6 +32,6 @@ namespace Automation.DemoApp
 			MouseClick(96, 56);			
 		}
 
-		private static readonly string TEST_CONTENTS = "Do not go gentle into that good night,\nOld age should burn and rave at close of day,\nRage, rage against the dying of the light.";
+		private static readonly string TEST_CONTENTS = "+Do not go gentle into that good night,\nOld age should burn and rave at close of day,\nRage, rage against the dying of the light.";
 	}
 }

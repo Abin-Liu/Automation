@@ -518,107 +518,20 @@ namespace Automation
 		/// <param name="key">Keys value</param>
 		/// <param name="mods">Modifiers</param>
 		/// </summary>
-		public static void KeyStroke(Keys key, ModKeys mods = ModKeys.None)
+		public static void KeyStroke(Keys key, Keys mods = Keys.None)
 		{
 			KeyDown(key, mods);			
 			KeyUp(key, mods);
-		}
+		}		
 
 		/// <summary> 
-		/// Send a character		
-		/// <param name="value">Character value</param>
-		/// <param name="mods">Modifiers</param>
+		/// Send a sequence of keystokes		
+		/// <param name="keys">The string defines keys to be sent, same format as System.Windows.SendKeys</param>
+		/// <param name="delay">Delay between each 2 key, in milliseconds</param>
 		/// </summary>
-		public static void SendChar(char value, ModKeys mods = ModKeys.None)
+		public static void KeyStroke(string keys, int delay = 0)
 		{
-			SendChar("" + value, mods);
-		}
-
-		/// <summary> 
-		/// Send a character
-		/// <param name="name">Character name</param>
-		/// <param name="mods">Modifiers</param>
-		/// </summary>
-		public static void SendChar(string name, ModKeys mods = ModKeys.None)
-		{
-			switch (name)
-			{				
-				case "\n":
-					name = "ENTER";
-					break;
-
-				case "\t":
-					name = "TAB";
-					break;
-
-				case "\b":
-					name = "BACKSPACE";
-					break;
-
-				case "\r":
-				case "\0":
-					name = "";
-					break;
-
-				case " ":
-					name = "";
-					KeyStroke(Keys.Space, mods); // SendKeys does not support {Space}
-					break;
-
-				default:
-					break;
-			}
-
-			if (String.IsNullOrEmpty(name))
-			{
-				return;
-			}			
-
-			name = "{" + name + "}";
-			if ((mods & ModKeys.Alt) != 0)
-			{
-				name = "%" + name;
-			}
-
-			if ((mods & ModKeys.Control) != 0)
-			{
-				name = "^" + name;
-			}
-
-			if ((mods & ModKeys.Shift) != 0)
-			{
-				name = "+" + name;
-			}
-
-			try
-			{
-				SendKeys.SendWait(name);
-			}
-			catch
-			{
-			}			
-		}
-
-		/// <summary> 
-		/// Send a character		
-		/// <param name="contents">The string contents to be sent</param>
-		/// <param name="delay">Delay between each 2 characters, in milliseconds</param>
-		/// </summary>
-		public static void SendString(string contents, int delay = 0)
-		{
-			if (contents == null)
-			{
-				return;
-			}
-
-			foreach (char ch in contents)
-			{
-				SendChar(ch);
-				if (delay > 0)
-				{
-					Thread.Sleep(delay);
-				}
-			}
+			Input.KeyStroke(keys, delay);
 		}
 
 		/// <summary> 
@@ -626,7 +539,7 @@ namespace Automation
 		/// <param name="key">Keys value</param>
 		/// <param name="mods">Modifiers</param>
 		/// </summary>
-		public static void KeyDown(Keys key, ModKeys mods = ModKeys.None)
+		public static void KeyDown(Keys key, Keys mods = Keys.None)
 		{
 			Input.KeyDown(key, mods);
 		}
@@ -636,7 +549,7 @@ namespace Automation
 		/// <param name="key">Keys value</param>
 		/// <param name="mods">Modifiers</param>
 		/// </summary>
-		public static void KeyUp(Keys key, ModKeys mods = ModKeys.None)
+		public static void KeyUp(Keys key, Keys mods = Keys.None)
 		{
 			Input.KeyUp(key, mods);
 		}

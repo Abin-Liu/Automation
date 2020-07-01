@@ -25,20 +25,20 @@ namespace Win32API
 		/// <param name="vk">Key</param>
 		/// <param name="mods">Modifiers, default is none</param>
 		/// <returns></returns>
-		public static bool RegisterHotKey(IntPtr hWnd, int id, Keys vk, ModKeys mods = ModKeys.None)
+		public static bool RegisterHotKey(IntPtr hWnd, int id, Keys vk, Keys mods = Keys.None)
 		{
 			int flags = 0;
-			if ((mods & ModKeys.Alt) != 0)
+			if ((mods & Keys.Alt) == Keys.Alt)
 			{
 				flags |= MOD_ALT;
 			}
 
-			if ((mods & ModKeys.Shift) != 0)
+			if ((mods & Keys.Shift) == Keys.Shift)
 			{
 				flags |= MOD_SHIFT;
 			}
 
-			if ((mods & ModKeys.Control) != 0)
+			if ((mods & Keys.Control) == Keys.Control)
 			{
 				flags |= MOD_CONTROL;
 			}
