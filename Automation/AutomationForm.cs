@@ -69,6 +69,16 @@ namespace Automation
 		public bool HideForm { get; set; } = false;
 
 		/// <summary>
+		/// Default constructor
+		/// </summary>
+		public AutomationForm()
+		{
+			Load += new EventHandler(AutomationForm_Load);
+			FormClosing += new FormClosingEventHandler(AutomationForm_FormClosing);
+			FormClosed += new FormClosedEventHandler(AutomationForm_FormClosed);
+		}
+
+		/// <summary>
 		/// Set the thread member
 		/// <param name="thread">An object derived from AutomationThread</param> 
 		/// </summary>
@@ -250,53 +260,7 @@ namespace Automation
 			{
 				Hotkey.UnregisterHotKey(this.Handle, id);
 			}			
-		}
-
-		/// <summary>
-		/// Inherited forms must call base.OnFormLoad(sender, e) in their Form_Load
-		/// </summary>
-		protected virtual void Form_OnLoad(object sender, EventArgs e)
-		{
-			if (HideForm)
-			{
-				this.Hide();
-				this.ShowInTaskbar = false;
-			}			
-
-			if (RegisterBossMode && !RegisterHotKey(HOTKEY_ID_BOSSMODE, Keys.B, Keys.Control | Keys.Alt))
-			{
-				Message("Failed to register the {Ctrl-Alt-B} key.");
-			}
-		}
-
-		/// <summary>
-		/// Inherited forms must call base.OnFormClosing(sender, e) in their Form_OnClosing
-		/// </summary>
-		protected virtual void Form_OnClosing(object sender, FormClosingEventArgs e)
-		{
-			bool cancel = false;
-			if (m_thread.IsAlive)
-			{
-				// Display a confirmation is the thread is alive
-				cancel = !Confirm("The thread is still running, exit anyway?");
-			}
-
-			// Cleanup before close
-			if (!cancel)
-			{
-				CleanupBeforeClose();
-			}
-
-			e.Cancel = cancel;
 		}		
-
-		/// <summary>
-		/// Inherited forms must call base.OnFormClosed(sender, e) in their Form_OnClosed
-		/// </summary>
-		protected virtual void Form_OnClosed(object sender, FormClosedEventArgs e)
-		{
-			CleanupBeforeClose();
-		}
 
 		/// <summary>
 		/// Override WndProc
@@ -357,6 +321,52 @@ namespace Automation
 		private List<int> m_hotkeys = new List<int>();
 		private IntPtr m_bossModeWnd = IntPtr.Zero;
 		private bool m_disposed = false;
+
+		/// <summary>
+		/// Called upon Load event
+		/// </summary>
+		private void AutomationForm_Load(object sender, EventArgs e)
+		{
+			if (HideForm)
+			{
+				this.Hide();
+				this.ShowInTaskbar = false;
+			}
+
+			if (RegisterBossMode && !RegisterHotKey(HOTKEY_ID_BOSSMODE, Keys.B, Keys.Control | Keys.Alt))
+			{
+				Message("Failed to register the {Ctrl-Alt-B} key.");
+			}
+		}
+
+		/// <summary>
+		/// Called upon FormClosing event
+		/// </summary>
+		private void AutomationForm_FormClosing(object sender, FormClosingEventArgs e)
+		{
+			bool cancel = false;
+			if (m_thread.IsAlive)
+			{
+				// Display a confirmation is the thread is alive
+				cancel = !Confirm("The thread is still running, exit anyway?");
+			}
+
+			// Cleanup before close
+			if (!cancel)
+			{
+				CleanupBeforeClose();
+			}
+
+			e.Cancel = cancel;
+		}
+
+		/// <summary>
+		/// Called upon FormClosed event
+		/// </summary>
+		private void AutomationForm_FormClosed(object sender, FormClosedEventArgs e)
+		{
+			CleanupBeforeClose();
+		}
 
 		protected virtual void CleanupBeforeClose()
 		{

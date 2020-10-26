@@ -39,6 +39,11 @@
             Whether hide main form (using a notification icon?)
             </summary>
         </member>
+        <member name="M:Automation.AutomationForm.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
         <member name="M:Automation.AutomationForm.SetThread(Automation.AutomationThread)">
             <summary>
             Set the thread member
@@ -147,25 +152,25 @@
             <param name="id">Hotkey id</param>		
             </summary>
         </member>
-        <member name="M:Automation.AutomationForm.Form_OnLoad(System.Object,System.EventArgs)">
-            <summary>
-            Inherited forms must call base.OnFormLoad(sender, e) in their Form_Load
-            </summary>
-        </member>
-        <member name="M:Automation.AutomationForm.Form_OnClosing(System.Object,System.Windows.Forms.FormClosingEventArgs)">
-            <summary>
-            Inherited forms must call base.OnFormClosing(sender, e) in their Form_OnClosing
-            </summary>
-        </member>
-        <member name="M:Automation.AutomationForm.Form_OnClosed(System.Object,System.Windows.Forms.FormClosedEventArgs)">
-            <summary>
-            Inherited forms must call base.OnFormClosed(sender, e) in their Form_OnClosed
-            </summary>
-        </member>
         <member name="M:Automation.AutomationForm.WndProc(System.Windows.Forms.Message@)">
             <summary>
             Override WndProc
             <param name="m">Message struct</param>		
+            </summary>
+        </member>
+        <member name="M:Automation.AutomationForm.AutomationForm_Load(System.Object,System.EventArgs)">
+            <summary>
+            Called upon Load event
+            </summary>
+        </member>
+        <member name="M:Automation.AutomationForm.AutomationForm_FormClosing(System.Object,System.Windows.Forms.FormClosingEventArgs)">
+            <summary>
+            Called upon FormClosing event
+            </summary>
+        </member>
+        <member name="M:Automation.AutomationForm.AutomationForm_FormClosed(System.Object,System.Windows.Forms.FormClosedEventArgs)">
+            <summary>
+            Called upon FormClosed event
             </summary>
         </member>
         <member name="T:Automation.AutomationThread">
