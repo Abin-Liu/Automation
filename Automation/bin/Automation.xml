@@ -744,17 +744,17 @@
             the contents of this method with the code editor.
             </summary>
         </member>
-        <member name="T:Automation.Utils.HotkeyRegisterFailure">
+        <member name="T:Automation.Utils.HotkeyRegisterFailureException">
             <summary>
             快捷键注册异常
             </summary>
         </member>
-        <member name="M:Automation.Utils.HotkeyRegisterFailure.#ctor">
+        <member name="M:Automation.Utils.HotkeyRegisterFailureException.#ctor">
             <summary>
             默认构造函数
             </summary>
         </member>
-        <member name="M:Automation.Utils.HotkeyRegisterFailure.#ctor(System.String)">
+        <member name="M:Automation.Utils.HotkeyRegisterFailureException.#ctor(System.String)">
             <summary>
             构造函数
             </summary>

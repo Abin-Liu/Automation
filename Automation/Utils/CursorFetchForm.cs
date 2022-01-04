@@ -62,7 +62,7 @@ namespace Automation.Utils
 			else
 			{
 				DialogResult = DialogResult.Cancel;
-				throw new HotkeyRegisterFailure();				
+				throw new HotkeyRegisterFailureException();				
 			}
 		}
 
@@ -122,12 +122,12 @@ namespace Automation.Utils
 	/// <summary>
 	/// 快捷键注册异常
 	/// </summary>
-	public class HotkeyRegisterFailure : Exception
+	public class HotkeyRegisterFailureException : Exception
 	{
 		/// <summary>
 		/// 默认构造函数
 		/// </summary>
-		public HotkeyRegisterFailure() : base("Failed to register hotkey.")
+		public HotkeyRegisterFailureException() : base("Failed to register hotkey.")
 		{
 		}
 
@@ -135,7 +135,7 @@ namespace Automation.Utils
 		/// 构造函数
 		/// </summary>
 		/// <param name="message">异常说明</param>
-		public HotkeyRegisterFailure(string message): base(message)
+		public HotkeyRegisterFailureException(string message): base(message)
 		{
 		}
 	}
