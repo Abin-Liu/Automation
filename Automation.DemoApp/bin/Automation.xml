@@ -686,6 +686,120 @@
               Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
             </summary>
         </member>
+        <member name="T:Automation.Utils.CursorFetchForm">
+            <summary>
+            鼠标抓取提示窗口
+            </summary>
+        </member>
+        <member name="P:Automation.Utils.CursorFetchForm.HotKey">
+            <summary>
+            抓取快捷键
+            </summary>
+        </member>
+        <member name="P:Automation.Utils.CursorFetchForm.Modifiers">
+            <summary>
+            抓取组合键
+            </summary>
+        </member>
+        <member name="P:Automation.Utils.CursorFetchForm.Message">
+            <summary>
+            窗口提示信息
+            </summary>
+        </member>
+        <member name="P:Automation.Utils.CursorFetchForm.RefWnd">
+            <summary>
+            参照窗口
+            </summary>
+        </member>
+        <member name="P:Automation.Utils.CursorFetchForm.Result">
+            <summary>
+            抓取结果
+            </summary>
+        </member>
+        <member name="M:Automation.Utils.CursorFetchForm.#ctor">
+            <summary>
+            默认构造函数
+            </summary>
+        </member>
+        <member name="M:Automation.Utils.CursorFetchForm.WndProc(System.Windows.Forms.Message@)">
+            <summary>
+            
+            </summary>
+            <param name="m"></param>
+        </member>
+        <member name="F:Automation.Utils.CursorFetchForm.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:Automation.Utils.CursorFetchForm.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:Automation.Utils.CursorFetchForm.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="T:Automation.Utils.HotkeyRegisterFailure">
+            <summary>
+            快捷键注册异常
+            </summary>
+        </member>
+        <member name="M:Automation.Utils.HotkeyRegisterFailure.#ctor">
+            <summary>
+            默认构造函数
+            </summary>
+        </member>
+        <member name="M:Automation.Utils.HotkeyRegisterFailure.#ctor(System.String)">
+            <summary>
+            构造函数
+            </summary>
+            <param name="message">异常说明</param>
+        </member>
+        <member name="T:Automation.Utils.CursorFetchResult">
+            <summary>
+            鼠标点捕捉结果
+            </summary>
+        </member>
+        <member name="P:Automation.Utils.CursorFetchResult.X">
+            <summary>
+            鼠标位置X（如果参照窗口为IntPtr.Zero则相对于屏幕，否则相对于参照窗口的客户端区域）
+            </summary>
+        </member>
+        <member name="P:Automation.Utils.CursorFetchResult.Y">
+            <summary>
+            鼠标位置Y（如果TargetWnd为IntPtr.Zero则相对于屏幕，否则相对于TargetWnd的Client-Area）
+            </summary>
+        </member>
+        <member name="P:Automation.Utils.CursorFetchResult.Color">
+            <summary>
+            鼠标位置像素颜色值
+            </summary>
+        </member>
+        <member name="P:Automation.Utils.CursorFetchResult.R">
+            <summary>
+            像素R值
+            </summary>
+        </member>
+        <member name="P:Automation.Utils.CursorFetchResult.G">
+            <summary>
+            像素G值
+            </summary>
+        </member>
+        <member name="P:Automation.Utils.CursorFetchResult.B">
+            <summary>
+            像素R值
+            </summary>
+        </member>
+        <member name="P:Automation.Utils.CursorFetchResult.RefWnd">
+            <summary>
+            参照窗口句柄
+            </summary>
+        </member>
         <member name="T:MFGLib.Locale">
             <summary>
             Key-value map for locale strings

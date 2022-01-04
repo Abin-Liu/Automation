@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using Automation;
+using Automation.Utils;
 
 namespace Automation.DemoApp
 {
@@ -61,6 +62,24 @@ namespace Automation.DemoApp
 		{
 			FormClientDC form = new FormClientDC();
 			form.ShowDialog(this);
+		}
+
+		private void btnCursorFetch_Click(object sender, EventArgs e)
+		{
+			CursorFetchForm form = new CursorFetchForm();
+			form.HotKey = Keys.Pause;
+			form.RefWnd = Win32API.Window.FindWindow("XLMAIN", "Email format-12-1.xlsx - Excel");
+			form.Message = "Press Pause key";
+
+			if (form.ShowDialog(this) != DialogResult.OK)
+			{
+				return;
+			}
+
+			CursorFetchResult res = form.Result;
+			string message = string.Format("{0},{1} = {2},{3},{4}", res.X, res.Y, res.R, res.G, res.B);
+			MessageBox.Show(this, message);
+
 		}
 	}
 }

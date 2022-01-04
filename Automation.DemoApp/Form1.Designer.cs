@@ -31,6 +31,7 @@
 			this.btnStart = new System.Windows.Forms.Button();
 			this.btnStop = new System.Windows.Forms.Button();
 			this.btnClientDC = new System.Windows.Forms.Button();
+			this.btnCursorFetch = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// btnStart
@@ -64,11 +65,22 @@
 			this.btnClientDC.UseVisualStyleBackColor = true;
 			this.btnClientDC.Click += new System.EventHandler(this.btnClientDC_Click);
 			// 
+			// btnCursorFetch
+			// 
+			this.btnCursorFetch.Location = new System.Drawing.Point(298, 72);
+			this.btnCursorFetch.Name = "btnCursorFetch";
+			this.btnCursorFetch.Size = new System.Drawing.Size(75, 23);
+			this.btnCursorFetch.TabIndex = 1;
+			this.btnCursorFetch.Text = "CursorFetch";
+			this.btnCursorFetch.UseVisualStyleBackColor = true;
+			this.btnCursorFetch.Click += new System.EventHandler(this.btnCursorFetch_Click);
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(356, 124);
+			this.ClientSize = new System.Drawing.Size(497, 149);
+			this.Controls.Add(this.btnCursorFetch);
 			this.Controls.Add(this.btnClientDC);
 			this.Controls.Add(this.btnStop);
 			this.Controls.Add(this.btnStart);
@@ -86,6 +98,7 @@
 		private System.Windows.Forms.Button btnStart;
 		private System.Windows.Forms.Button btnStop;
 		private System.Windows.Forms.Button btnClientDC;
+		private System.Windows.Forms.Button btnCursorFetch;
 	}
 }
 
