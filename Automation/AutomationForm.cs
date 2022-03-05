@@ -13,17 +13,17 @@ namespace Automation
 		/// <summary>
 		/// Whether the thread is running
 		/// </summary>
-		public virtual bool IsAlive { get { return m_thread.IsAlive; } }
+		public virtual bool IsAlive => m_thread != null && m_thread.IsAlive;
 
 		/// <summary>
 		/// Whether the thread was stopped by user
 		/// </summary>
-		public bool Aborted { get { return m_thread.Aborted; } }		
+		public bool Aborted => m_thread != null && m_thread.Aborted;		
 
 		/// <summary>
 		/// Automatically register the {Ctrl-Alt-B} key which triggers boss mode (hide/show the target window)
 		/// </summary>
-		public bool RegisterBossMode { get; set; } = false;
+		public bool RegisterBossMode { get; set; }
 
 		/// <summary>
 		/// Whether boss mode is on
@@ -39,6 +39,11 @@ namespace Automation
 			{
 				if (value)
 				{
+					if (m_thread == null)
+					{
+						return;
+					}
+
 					m_bossModeWnd = m_thread.FindTargetWnd();
 					if (m_bossModeWnd != IntPtr.Zero)
 					{
@@ -66,7 +71,7 @@ namespace Automation
 		/// <summary>
 		/// Whether hide main form (using a notification icon?)
 		/// </summary>
-		public bool HideForm { get; set; } = false;
+		public bool HideForm { get; set; }
 
 		/// <summary>
 		/// Default constructor
@@ -93,6 +98,11 @@ namespace Automation
 		/// </summary>
 		public virtual bool StartThread()
 		{
+			if (m_thread == null)
+			{
+				throw new NullReferenceException("Thread is null.");
+			}
+
 			bool success = m_thread.Start(this, ThreadTickInterval);
 			if (!success)
 			{
@@ -106,6 +116,11 @@ namespace Automation
 		/// </summary>
 		public virtual void StopThread()
 		{
+			if (m_thread == null)
+			{
+				throw new NullReferenceException("Thread is null.");
+			}
+
 			m_thread.Stop();
 		}
 
@@ -114,6 +129,11 @@ namespace Automation
 		/// </summary>
 		public virtual void ToggleThread()
 		{
+			if (m_thread == null)
+			{
+				throw new NullReferenceException("Thread is null.");
+			}
+
 			if (IsAlive)
 			{
 				StopThread();
@@ -149,7 +169,11 @@ namespace Automation
 			}
 
 			// Pause the thread while message dialog is on
-			m_thread.Paused = true;
+			if (m_thread != null)
+			{
+				m_thread.Paused = true;
+			}
+			
 			if (Window.GetForegroundWindow() != this.Handle)
 			{
 				if (Window.IsMinimized(this.Handle))
@@ -160,7 +184,11 @@ namespace Automation
 			}
 
 			DialogResult result = MessageBox.Show(this, text, Application.ProductName, buttons, icon);
-			m_thread.Paused = false;
+			if (m_thread != null)
+			{
+				m_thread.Paused = false;
+			}
+			
 			return result;
 		}
 
@@ -345,7 +373,7 @@ namespace Automation
 		private void AutomationForm_FormClosing(object sender, FormClosingEventArgs e)
 		{
 			bool cancel = false;
-			if (m_thread.IsAlive)
+			if (m_thread != null && m_thread.IsAlive)
 			{
 				// Display a confirmation is the thread is alive
 				cancel = !Confirm("The thread is still running, exit anyway?");
@@ -389,9 +417,13 @@ namespace Automation
 			}
 			m_bossModeWnd = IntPtr.Zero;
 
-			m_thread.Stop();
-			m_thread.Alerting = false;
-			m_thread.Dispose();
+			if (m_thread != null)
+			{
+				m_thread.Stop();
+				m_thread.Alerting = false;
+				m_thread.Dispose();
+			}
+			
 			m_disposed = true;
 		}
 
