@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using Automation;
 using Automation.Utils;
+using UIToolkits;
 
 namespace Automation.DemoApp
 {
@@ -53,7 +54,7 @@ namespace Automation.DemoApp
 		protected override void OnThreadStop()
 		{
 			base.OnThreadStop();
-			Message("Thread stopped.", MessageBoxIcon.Information);
+			MessageBoxPro.Info(this, "Thread stopped.");
 			btnStart.Enabled = true;
 			btnStop.Enabled = false;			
 		}

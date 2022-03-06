@@ -24,12 +24,14 @@ namespace Automation.DemoApp
 			KeyStroke(TEST_CONTENTS, 100);
 
 			// Click the save menu
-			DelayBeforeAction(500);
-			MouseClick(14, -13);
-			DelayBeforeAction(500);
-			MouseMove(96, 56);
-			DelayBeforeAction(800);
-			MouseClick(96, 56);			
+			//DelayBeforeAction(500);
+			//MouseClick(14, -13);
+			//DelayBeforeAction(500);
+			//MouseMove(96, 56);
+			//DelayBeforeAction(800);
+			//MouseClick(96, 56);
+
+			Sleep(3500);
 		}
 
 		private static readonly string TEST_CONTENTS = "+Do not go gentle into that good night,\nOld age should burn and rave at close of day,\nRage, rage against the dying of the light.";

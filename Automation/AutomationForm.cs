@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 using Win32API;
+using UIToolkits;
 
 namespace Automation
 {
@@ -10,6 +11,21 @@ namespace Automation
 	/// </summary>
 	public class AutomationForm : Form
 	{
+		/// <summary>
+		/// Message for user trying to exit app while the thread is alive
+		/// </summary>
+		public string TargetNotFoundMessage { get; set; } = "Target window not found.";
+
+		/// <summary>
+		/// Message for user trying to exit app while the thread is alive
+		/// </summary>
+		public string ExitAliveMessage { get; set; } = "The thread is still running, exit anyway?";
+
+		/// <summary>
+		/// Message for hotkey registering failure
+		/// </summary>
+		public string BossModeHotKeyFailureMessage { get; set; } = "Failed to register the {Ctrl-Alt-B} key.";
+
 		/// <summary>
 		/// Whether the thread is running
 		/// </summary>
@@ -66,7 +82,7 @@ namespace Automation
 		/// <summary>
 		/// Thread tick interval, in milliseconds, 0 to disable ticking
 		/// </summary>
-		public int ThreadTickInterval { get; set; } = 1000;
+		public int ThreadTickInterval { get; set; }
 
 		/// <summary>
 		/// Whether hide main form (using a notification icon?)
@@ -103,11 +119,19 @@ namespace Automation
 				throw new NullReferenceException("Thread is null.");
 			}
 
+			IntPtr target = m_thread.FindTargetWnd();
+			if (target == IntPtr.Zero)
+			{
+				MessageBoxPro.Error(this, TargetNotFoundMessage);
+				return false;
+			}
+
 			bool success = m_thread.Start(this, ThreadTickInterval);
 			if (!success)
 			{
-				Message(m_thread.LastError);
+				MessageBoxPro.Error(this, m_thread.LastError);
 			}
+
 			return success;
 		}
 
@@ -142,55 +166,25 @@ namespace Automation
 			{
 				StartThread();
 			}
-		}
+		}		
 
 		/// <summary>
-		/// Display a confirmation dialog with OK and Cancel buttons
-		/// <param name="text">Message text</param> 
-		/// <returns>Return true if the user clicks the OK button.</returns>
+		/// 显示本窗口并置于前台
 		/// </summary>
-		public bool Confirm(string text)
+		public void ShowForm()
 		{
-			return Message(text, MessageBoxIcon.Question, MessageBoxButtons.OKCancel) == DialogResult.OK;
-		}
-
-		/// <summary>
-		/// Display a message dialog
-		/// <param name="text">Message text.</param> 
-		/// <param name="icon">Dialog icon, default is exclamation.</param>
-		/// <param name="buttons">Dialog buttons, default is single OK.</param>
-		/// <returns>Return the user choice.</returns>
-		/// </summary>
-		public DialogResult Message(string text, MessageBoxIcon icon = MessageBoxIcon.Exclamation, MessageBoxButtons buttons = MessageBoxButtons.OK)
-		{
-			if (string.IsNullOrEmpty(text))
+			if (Window.GetForegroundWindow() == Handle)
 			{
-				return DialogResult.Cancel;
+				return;
 			}
 
-			// Pause the thread while message dialog is on
-			if (m_thread != null)
+			if (Window.IsMinimized(Handle))
 			{
-				m_thread.Paused = true;
-			}
-			
-			if (Window.GetForegroundWindow() != this.Handle)
-			{
-				if (Window.IsMinimized(this.Handle))
-				{
-					Window.ShowWindow(this.Handle, Window.SW_RESTORE);
-				}
-				Window.SetForegroundWindow(this.Handle);
+				Window.ShowWindow(Handle, Window.SW_RESTORE);
 			}
 
-			DialogResult result = MessageBox.Show(this, text, Application.ProductName, buttons, icon);
-			if (m_thread != null)
-			{
-				m_thread.Paused = false;
-			}
-			
-			return result;
-		}
+			Window.SetForegroundWindow(Handle);
+		}		
 
 		// Overrides
 		/// <summary>
@@ -252,7 +246,7 @@ namespace Automation
 		/// </summary>
 		public void UnregisterMainKey()
 		{
-			Hotkey.UnregisterHotKey(this.Handle, HOTKEY_ID_PAUSE);
+			Hotkey.UnregisterHotKey(Handle, HOTKEY_ID_PAUSE);
 		}
 
 		/// <summary>
@@ -269,7 +263,7 @@ namespace Automation
 				return false;
 			}
 
-			if (!Hotkey.RegisterHotKey(this.Handle, id, key, mods))
+			if (!Hotkey.RegisterHotKey(Handle, id, key, mods))
 			{
 				return false;
 			}
@@ -286,7 +280,7 @@ namespace Automation
 		{
 			if (m_hotkeys.Remove(id))
 			{
-				Hotkey.UnregisterHotKey(this.Handle, id);
+				Hotkey.UnregisterHotKey(Handle, id);
 			}			
 		}		
 
@@ -357,13 +351,13 @@ namespace Automation
 		{
 			if (HideForm)
 			{
-				this.Hide();
-				this.ShowInTaskbar = false;
+				Hide();
+				ShowInTaskbar = false;
 			}
 
 			if (RegisterBossMode && !RegisterHotKey(HOTKEY_ID_BOSSMODE, Keys.B, Keys.Control | Keys.Alt))
 			{
-				Message("Failed to register the {Ctrl-Alt-B} key.");
+				MessageBoxPro.Error(this, BossModeHotKeyFailureMessage);
 			}
 		}
 
@@ -376,7 +370,7 @@ namespace Automation
 			if (m_thread != null && m_thread.IsAlive)
 			{
 				// Display a confirmation is the thread is alive
-				cancel = !Confirm("The thread is still running, exit anyway?");
+				cancel = !MessageBoxPro.Confirm(this, ExitAliveMessage);
 			}
 
 			// Cleanup before close

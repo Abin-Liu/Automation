@@ -22,27 +22,27 @@ namespace Automation
 		/// <summary> 
 		/// Client rectangle of the target window, top-left is always 0,0
 		/// </summary>
-		public Rectangle ClientRect { get { return Window.GetClientRect(TargetWnd); } }
+		public Rectangle ClientRect => Window.GetClientRect(TargetWnd);
 
 		/// <summary> 
 		/// Win32 ClientToScreen offset
 		/// </summary>
-		public Point ClientToScreen { get { return Window.ClientToScreen(TargetWnd); } }
+		public Point ClientToScreen => Window.ClientToScreen(TargetWnd);
 
 		/// <summary> 
 		/// Win32 ScreenToClient offset
 		/// </summary>
-		public Point ScreenToClient { get { return Window.ScreenToClient(TargetWnd); } }
+		public Point ScreenToClient => Window.ScreenToClient(TargetWnd);
 
 		/// <summary> 
 		/// Thread error messages used by message window
 		/// </summary> 
-		public string LastError { get; protected set; } = null;
+		public string LastError { get; protected set; }
 
 		/// <summary>
 		/// Turn on/off beep sounds for thread start/stop
 		/// </summary>
-		public bool EnableBeeps { get; set; } = false;
+		public bool EnableBeeps { get; set; }
 
 		/// <summary> 
 		/// Start or stop sound alarm
@@ -79,17 +79,17 @@ namespace Automation
 		/// <summary> 
 		/// Whether the thread is running
 		/// </summary> 
-		public bool IsAlive { get { return m_thread.IsAlive; } }
+		public bool IsAlive => m_thread.IsAlive;
 
 		/// <summary> 
 		/// Whether the thread was aborted by user
 		/// </summary> 
-		public bool Aborted { get { return m_thread.Aborted; } }
+		public bool Aborted => m_thread.Aborted;
 
 		/// <summary> 
 		/// Pause or resume the thread
 		/// </summary> 
-		public bool Paused { get; set; } = false;
+		public bool Paused { get; set; }
 		#endregion
 
 		#region C'tors
@@ -179,30 +179,30 @@ namespace Automation
 
 		/// <summary> 
 		/// Sync lock
-		/// <param name="obj">Object to lock, use this if null</param> 
+		/// <param name="locker">Object to lock, use internal locker if null</param> 
 		/// </summary>
-		public void Lock(Object obj = null)
+		public void Lock(object locker = null)
 		{
-			if (obj == null)
+			if (locker == null)
 			{
-				obj = this;
+				locker = m_locker;
 			}
 
-			m_thread.Lock(obj);
+			m_thread.Lock(locker);
 		}
 
 		/// <summary> 
 		/// Sync unlock
-		/// <param name="obj">Object to unlock, use this if null</param> 
+		/// <param name="locker">Object to unlock, use internal locker if null</param> 
 		/// </summary>
-		public void Unlock(Object obj = null)
+		public void Unlock(object locker = null)
 		{
-			if (obj == null)
+			if (locker == null)
 			{
-				obj = this;
+				locker = m_locker;
 			}
 
-			m_thread.Lock(obj);
+			m_thread.Lock(locker);
 		}
 
 		#endregion
@@ -305,6 +305,17 @@ namespace Automation
 			Window.SetForegroundWindow(TargetWnd);
 		}
 
+		/// <summary>
+		/// Wait until the target window is foreground
+		/// </summary>
+		public void WaitTargetWndForeground()
+		{
+			while (!IsTargetWndForeground())
+			{
+				Sleep(1000);
+			}
+		}
+
 		/// <summary> 
 		/// Apply a delay before sending an action for stablity, also check for thread pause status.
 		/// <param name="milliseconds">Delay in milliseconds</param> 
@@ -395,6 +406,19 @@ namespace Automation
 		public static byte GetBValue(int color)
 		{
 			return MemDC.GetBValue(color);
+		}
+
+		/// <summary>
+		/// Check pixel color with tolerances
+		/// </summary>
+		/// <param name="color">Color to be checked</param>
+		/// <param name="rangeR">Tolerance range [min, max] for R value, null to ignore R value check</param>
+		/// <param name="rangeG">Tolerance range [min, max] for G value, null to ignore G value check</param>
+		/// <param name="rangeB">Tolerance range [min, max] for B value, null to ignore B value check</param>
+		/// <returns>Return true if the pixel passed, false otherwise</returns>
+		public static bool ExamPixel(int color, int[] rangeR, int[] rangeG, int[] rangeB)
+		{
+			return MemDC.ExamPixel(color, rangeR, rangeG, rangeB);
 		}
 		#endregion
 
@@ -621,6 +645,7 @@ namespace Automation
 		private MemDC m_dc = new MemDC();
 		private bool m_alerting = false; // Sound alarm on?
 		private IntPtr m_messageWnd = IntPtr.Zero;
+		private object m_locker = new object(); // internal object for locking
 		private SoundPlayer m_soundPlayerStart = new SoundPlayer(Resources.ResourceManager.GetStream("Start"));
 		private SoundPlayer m_soundPlayerStop = new SoundPlayer(Resources.ResourceManager.GetStream("Stop"));
 		private SoundPlayer m_soundPlayerAlert = new SoundPlayer(Resources.ResourceManager.GetStream("Alert"));		

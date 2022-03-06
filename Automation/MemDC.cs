@@ -177,6 +177,38 @@ namespace Automation
 			return GetPixel(0, 0);
 		}
 
+		/// <summary>
+		/// Check pixel color with tolerances
+		/// </summary>
+		/// <param name="color">Color to be checked</param>
+		/// <param name="rangeR">Tolerance range [min, max] for R value, null to ignore R value check</param>
+		/// <param name="rangeG">Tolerance range [min, max] for G value, null to ignore G value check</param>
+		/// <param name="rangeB">Tolerance range [min, max] for B value, null to ignore B value check</param>
+		/// <returns>Return true if the pixel passed, false otherwise</returns>
+		public static bool ExamPixel(int color, int[] rangeR, int[] rangeG, int[] rangeB)
+		{
+			int r = GetRValue(color);
+			int g = GetGValue(color);
+			int b = GetBValue(color);
+
+			if (rangeR != null && (r < rangeR[0] || r > rangeR[1]))
+			{
+				return false;
+			}
+
+			if (rangeG != null && (g < rangeG[0] || g > rangeG[1]))
+			{
+				return false;
+			}
+
+			if (rangeB != null && (b < rangeB[0] || b > rangeB[1]))
+			{
+				return false;
+			}
+
+			return true;
+		}		
+
 		/// <summary> 
 		/// Keeps checking whether a pixel of the target window matches specified RGB values
 		/// <param name="x">X coords of screen</param> 

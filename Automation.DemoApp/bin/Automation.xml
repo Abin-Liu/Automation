@@ -9,6 +9,21 @@
             A Form derived class controls AutomationThread
             </summary>
         </member>
+        <member name="P:Automation.AutomationForm.TargetNotFoundMessage">
+            <summary>
+            Message for user trying to exit app while the thread is alive
+            </summary>
+        </member>
+        <member name="P:Automation.AutomationForm.ExitAliveMessage">
+            <summary>
+            Message for user trying to exit app while the thread is alive
+            </summary>
+        </member>
+        <member name="P:Automation.AutomationForm.BossModeHotKeyFailureMessage">
+            <summary>
+            Message for hotkey registering failure
+            </summary>
+        </member>
         <member name="P:Automation.AutomationForm.IsAlive">
             <summary>
             Whether the thread is running
@@ -66,20 +81,9 @@
             Toggle the thread
             </summary>
         </member>
-        <member name="M:Automation.AutomationForm.Confirm(System.String)">
+        <member name="M:Automation.AutomationForm.ShowForm">
             <summary>
-            Display a confirmation dialog with OK and Cancel buttons
-            <param name="text">Message text</param> 
-            <returns>Return true if the user clicks the OK button.</returns>
-            </summary>
-        </member>
-        <member name="M:Automation.AutomationForm.Message(System.String,System.Windows.Forms.MessageBoxIcon,System.Windows.Forms.MessageBoxButtons)">
-            <summary>
-            Display a message dialog
-            <param name="text">Message text.</param> 
-            <param name="icon">Dialog icon, default is exclamation.</param>
-            <param name="buttons">Dialog buttons, default is single OK.</param>
-            <returns>Return the user choice.</returns>
+            显示本窗口并置于前台
             </summary>
         </member>
         <member name="M:Automation.AutomationForm.OnThreadStart">
@@ -259,13 +263,13 @@
         <member name="M:Automation.AutomationThread.Lock(System.Object)">
             <summary> 
             Sync lock
-            <param name="obj">Object to lock, use this if null</param> 
+            <param name="locker">Object to lock, use internal locker if null</param> 
             </summary>
         </member>
         <member name="M:Automation.AutomationThread.Unlock(System.Object)">
             <summary> 
             Sync unlock
-            <param name="obj">Object to unlock, use this if null</param> 
+            <param name="locker">Object to unlock, use internal locker if null</param> 
             </summary>
         </member>
         <member name="M:Automation.AutomationThread.FindTargetWnd">
@@ -324,6 +328,11 @@
         <member name="M:Automation.AutomationThread.SetTargetWndForeground">
             <summary> 
             Set the target window foreground		
+            </summary>
+        </member>
+        <member name="M:Automation.AutomationThread.WaitTargetWndForeground">
+            <summary>
+            Wait until the target window is foreground
             </summary>
         </member>
         <member name="M:Automation.AutomationThread.DelayBeforeAction(System.Int32)">
@@ -387,6 +396,16 @@
             </summary>
             <param name="color">Integer form of rgb value</param>
             <returns>Value of the b component</returns>
+        </member>
+        <member name="M:Automation.AutomationThread.ExamPixel(System.Int32,System.Int32[],System.Int32[],System.Int32[])">
+            <summary>
+            Check pixel color with tolerances
+            </summary>
+            <param name="color">Color to be checked</param>
+            <param name="rangeR">Tolerance range [min, max] for R value, null to ignore R value check</param>
+            <param name="rangeG">Tolerance range [min, max] for G value, null to ignore G value check</param>
+            <param name="rangeB">Tolerance range [min, max] for B value, null to ignore B value check</param>
+            <returns>Return true if the pixel passed, false otherwise</returns>
         </member>
         <member name="M:Automation.AutomationThread.TranslateLocation(System.Int32,System.Int32)">
             <summary> 
@@ -582,6 +601,16 @@
             <param name="y">Y coords of screen.</param>
             <returns>Return RGB value if success, COLOR_INVALID otherwise.</returns>
         </member>
+        <member name="M:Automation.MemDC.ExamPixel(System.Int32,System.Int32[],System.Int32[],System.Int32[])">
+            <summary>
+            Check pixel color with tolerances
+            </summary>
+            <param name="color">Color to be checked</param>
+            <param name="rangeR">Tolerance range [min, max] for R value, null to ignore R value check</param>
+            <param name="rangeG">Tolerance range [min, max] for G value, null to ignore G value check</param>
+            <param name="rangeB">Tolerance range [min, max] for B value, null to ignore B value check</param>
+            <returns>Return true if the pixel passed, false otherwise</returns>
+        </member>
         <member name="M:Automation.MemDC.WaitForPixel(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)">
             <summary> 
             Keeps checking whether a pixel of the target window matches specified RGB values
@@ -744,17 +773,17 @@
             the contents of this method with the code editor.
             </summary>
         </member>
-        <member name="T:Automation.Utils.HotkeyRegisterFailure">
+        <member name="T:Automation.Utils.HotkeyRegisterFailureException">
             <summary>
             快捷键注册异常
             </summary>
         </member>
-        <member name="M:Automation.Utils.HotkeyRegisterFailure.#ctor">
+        <member name="M:Automation.Utils.HotkeyRegisterFailureException.#ctor">
             <summary>
             默认构造函数
             </summary>
         </member>
-        <member name="M:Automation.Utils.HotkeyRegisterFailure.#ctor(System.String)">
+        <member name="M:Automation.Utils.HotkeyRegisterFailureException.#ctor(System.String)">
             <summary>
             构造函数
             </summary>
@@ -1043,6 +1072,216 @@
             <summary>
             Type definition of event callback functions
             </summary>
+        </member>
+        <member name="T:UIToolkits.MessageBoxPro">
+            <summary>
+            解决MessageBox无法居中显示于父窗体的缺陷
+            </summary>
+        </member>
+        <member name="M:UIToolkits.MessageBoxPro.Show(System.String)">
+            <summary>
+            显示消息框
+            </summary>
+            <param name="text">消息文字</param>
+            <returns>用户选择结果</returns>
+        </member>
+        <member name="M:UIToolkits.MessageBoxPro.Show(System.String,System.String)">
+            <summary>
+            显示消息框
+            </summary>
+            <param name="text">消息文字</param>
+            <param name="caption">窗体标题</param>
+            <returns>用户选择结果</returns>
+        </member>
+        <member name="M:UIToolkits.MessageBoxPro.Show(System.String,System.String,System.Windows.Forms.MessageBoxButtons)">
+            <summary>
+            显示消息框
+            </summary>
+            <param name="text">消息文字</param>
+            <param name="caption">窗体标题</param>
+            <param name="buttons">按钮组合</param>
+            <returns>用户选择结果</returns>
+        </member>
+        <member name="M:UIToolkits.MessageBoxPro.Show(System.String,System.String,System.Windows.Forms.MessageBoxButtons,System.Windows.Forms.MessageBoxIcon)">
+            <summary>
+            显示消息框
+            </summary>
+            <param name="text">消息文字</param>
+            <param name="caption">窗体标题</param>
+            <param name="buttons">按钮组合</param>
+            <param name="icon">主题图标</param>
+            <returns>用户选择结果</returns>
+        </member>
+        <member name="M:UIToolkits.MessageBoxPro.Show(System.String,System.String,System.Windows.Forms.MessageBoxButtons,System.Windows.Forms.MessageBoxIcon,System.Windows.Forms.MessageBoxDefaultButton)">
+            <summary>
+            显示消息框
+            </summary>
+            <param name="text">消息文字</param>
+            <param name="caption">窗体标题</param>
+            <param name="buttons">按钮组合</param>
+            <param name="icon">主题图标</param>
+            <param name="defButton">默认按钮</param>
+            <returns>用户选择结果</returns>
+        </member>
+        <member name="M:UIToolkits.MessageBoxPro.Show(System.String,System.String,System.Windows.Forms.MessageBoxButtons,System.Windows.Forms.MessageBoxIcon,System.Windows.Forms.MessageBoxDefaultButton,System.Windows.Forms.MessageBoxOptions)">
+            <summary>
+            显示消息框
+            </summary>
+            <param name="text">消息文字</param>
+            <param name="caption">窗体标题</param>
+            <param name="buttons">按钮组合</param>
+            <param name="icon">主题图标</param>
+            <param name="defButton">默认按钮</param>
+            <param name="options">显示选项</param>
+            <returns>用户选择结果</returns>
+        </member>
+        <member name="M:UIToolkits.MessageBoxPro.Show(System.Windows.Forms.IWin32Window,System.String)">
+            <summary>
+            显示消息框
+            </summary>
+            <param name="owner">要居中显示于的父窗体</param>
+            <param name="text">消息文字</param>
+            <returns>用户选择结果</returns>
+        </member>
+        <member name="M:UIToolkits.MessageBoxPro.Show(System.Windows.Forms.IWin32Window,System.String,System.String)">
+            <summary>
+            显示消息框
+            </summary>
+            <param name="owner">要居中显示于的父窗体</param>
+            <param name="text">消息文字</param>
+            <param name="caption">窗体标题</param>
+            <returns>用户选择结果</returns>
+        </member>
+        <member name="M:UIToolkits.MessageBoxPro.Show(System.Windows.Forms.IWin32Window,System.String,System.String,System.Windows.Forms.MessageBoxButtons)">
+            <summary>
+            显示消息框
+            </summary>
+            <param name="owner">要居中显示于的父窗体</param>
+            <param name="text">消息文字</param>
+            <param name="caption">窗体标题</param>
+            <param name="buttons">按钮组合</param>
+            <returns>用户选择结果</returns>
+        </member>
+        <member name="M:UIToolkits.MessageBoxPro.Show(System.Windows.Forms.IWin32Window,System.String,System.String,System.Windows.Forms.MessageBoxButtons,System.Windows.Forms.MessageBoxIcon)">
+            <summary>
+            显示消息框
+            </summary>
+            <param name="owner">要居中显示于的父窗体</param>
+            <param name="text">消息文字</param>
+            <param name="caption">窗体标题</param>
+            <param name="buttons">按钮组合</param>
+            <param name="icon">主题图标</param>
+            <returns>用户选择结果</returns>
+        </member>
+        <member name="M:UIToolkits.MessageBoxPro.Show(System.Windows.Forms.IWin32Window,System.String,System.String,System.Windows.Forms.MessageBoxButtons,System.Windows.Forms.MessageBoxIcon,System.Windows.Forms.MessageBoxDefaultButton)">
+            <summary>
+            显示消息框
+            </summary>
+            <param name="owner">要居中显示于的父窗体</param>
+            <param name="text">消息文字</param>
+            <param name="caption">窗体标题</param>
+            <param name="buttons">按钮组合</param>
+            <param name="icon">主题图标</param>
+            <param name="defButton">默认按钮</param>
+            <returns>用户选择结果</returns>
+        </member>
+        <member name="M:UIToolkits.MessageBoxPro.Show(System.Windows.Forms.IWin32Window,System.String,System.String,System.Windows.Forms.MessageBoxButtons,System.Windows.Forms.MessageBoxIcon,System.Windows.Forms.MessageBoxDefaultButton,System.Windows.Forms.MessageBoxOptions)">
+            <summary>
+            显示消息框
+            </summary>
+            <param name="owner">要居中显示于的父窗体</param>
+            <param name="text">消息文字</param>
+            <param name="caption">窗体标题</param>
+            <param name="buttons">按钮组合</param>
+            <param name="icon">主题图标</param>
+            <param name="defButton">默认按钮</param>
+            <param name="options">显示选项</param>
+            <returns>用户选择结果</returns>
+        </member>
+        <member name="M:UIToolkits.MessageBoxPro.Prompt(System.String,System.String)">
+            <summary>
+            提示框: 无图标
+            </summary>
+            <param name="text">消息文字</param>
+            <param name="caption">窗体标题</param>
+            <returns>用户选择结果</returns>
+        </member>
+        <member name="M:UIToolkits.MessageBoxPro.Prompt(System.Windows.Forms.IWin32Window,System.String,System.String)">
+            <summary>
+            提示框: 无图标
+            </summary>
+            <param name="owner">要居中显示于的父窗体</param>
+            <param name="text">消息文字</param>
+            <param name="caption">窗体标题，如果为null则使用"Prompt"</param>
+            <returns>用户选择结果</returns>
+        </member>
+        <member name="M:UIToolkits.MessageBoxPro.Info(System.String,System.String)">
+            <summary>
+            提示框: 蓝色i图标
+            </summary>
+            <param name="text">消息文字</param>
+            <param name="caption">窗体标题</param>
+            <returns>用户选择结果</returns>
+        </member>
+        <member name="M:UIToolkits.MessageBoxPro.Info(System.Windows.Forms.IWin32Window,System.String,System.String)">
+            <summary>
+            提示框: 蓝色i图标
+            </summary>
+            <param name="owner">要居中显示于的父窗体</param>
+            <param name="text">消息文字</param>
+            <param name="caption">窗体标题</param>
+            <returns>用户选择结果</returns>
+        </member>
+        <member name="M:UIToolkits.MessageBoxPro.Warning(System.String,System.String)">
+            <summary>
+            提示框: 黄色感叹号图标
+            </summary>
+            <param name="text">消息文字</param>
+            <param name="caption">窗体标题</param>
+            <returns>用户选择结果</returns>
+        </member>
+        <member name="M:UIToolkits.MessageBoxPro.Warning(System.Windows.Forms.IWin32Window,System.String,System.String)">
+            <summary>
+            提示框: 黄色感叹号图标
+            </summary>
+            <param name="owner">要居中显示于的父窗体</param>
+            <param name="text">消息文字</param>
+            <param name="caption">窗体标题</param>
+            <returns>用户选择结果</returns>
+        </member>
+        <member name="M:UIToolkits.MessageBoxPro.Error(System.String,System.String)">
+            <summary>
+            提示框: 红底白叉图标
+            </summary>
+            <param name="text">消息文字</param>
+            <param name="caption">窗体标题</param>
+            <returns>用户选择结果</returns>
+        </member>
+        <member name="M:UIToolkits.MessageBoxPro.Error(System.Windows.Forms.IWin32Window,System.String,System.String)">
+            <summary>
+            提示框: 红底白叉图标
+            </summary>
+            <param name="owner">要居中显示于的父窗体</param>
+            <param name="text">消息文字</param>
+            <param name="caption">窗体标题</param>
+            <returns>用户选择结果</returns>
+        </member>
+        <member name="M:UIToolkits.MessageBoxPro.Confirm(System.String,System.String)">
+            <summary>
+            OK/Cancel确认选择框：问号图标
+            </summary>
+            <param name="text">消息文字</param>
+            <param name="caption">窗体标题</param>
+            <returns>用户选择OK返回true，否则返回false</returns>
+        </member>
+        <member name="M:UIToolkits.MessageBoxPro.Confirm(System.Windows.Forms.IWin32Window,System.String,System.String)">
+            <summary>
+            OK/Cancel确认选择框：问号图标
+            </summary>
+            <param name="owner">要居中显示于的父窗体</param>
+            <param name="text">消息文字</param>
+            <param name="caption">窗体标题</param>
+            <returns>用户选择OK返回true，否则返回false</returns>
         </member>
         <member name="T:Win32API.Hotkey">
             <summary>

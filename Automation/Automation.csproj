@@ -49,6 +49,7 @@
     </Compile>
     <Compile Include="AutomationThread.cs" />
     <Compile Include="Libs\Locale.cs" />
+    <Compile Include="Libs\MessageBoxPro.cs" />
     <Compile Include="Libs\Win32API.Hotkey.cs" />
     <Compile Include="Libs\Win32API.Input.cs" />
     <Compile Include="Libs\Win32API.Window.cs" />
