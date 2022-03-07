@@ -89,7 +89,7 @@ namespace Automation
 		/// <summary> 
 		/// Pause or resume the thread
 		/// </summary> 
-		public bool Paused { get; set; }
+		public bool Paused { get; set; }		
 		#endregion
 
 		#region C'tors
@@ -102,7 +102,6 @@ namespace Automation
 			m_thread.OnStop = _OnStop;
 			m_thread.ThreadProc = _ThreadProc;
 			m_ticker.OnTick = _OnTick;
-			RegisterLocales(); // Static method for localization
 		}
 
 		/// <summary> 
@@ -118,45 +117,34 @@ namespace Automation
 		/// <summary> 
 		/// Start the thread
 		/// <param name="messageForm">The window which receives thread messages, usually the main form</param>
-		/// <param name="tickInterval">Interval of the ticker, the ticker won't start if the parameter is 0</param> 
+		/// <param name="autoForeground">If true, the thread will periadically set target window foreground</param> 
 		/// </summary>
-		public virtual bool Start(Form messageForm, int tickInterval = 1000)
+		public virtual void Start(Form messageForm, bool autoForeground)
 		{
 			if (IsAlive)
 			{
-				LastError = Localize("Thread is already running.");
-				return false;
+				throw new ThreadAlreadyRunningException();
 			}
 
 			TargetWnd = FindTargetWnd();
 			if (TargetWnd == IntPtr.Zero)
 			{
-				LastError = Localize("Target window not found.");
-				return false;
+				throw new TargetWindowNotFoundException();
 			}
 
 			LastError = null;
 			Paused = false;
 
-			if (!PreStart())
-			{
-				return false;
-			}
+			PreStart();
 
 			m_messageWnd = messageForm.Handle;
 			m_thread.Start();
 
 			// Start the ticker
-			if (tickInterval > 0)
+			if (autoForeground)
 			{
-				if (tickInterval < 100)
-				{
-					tickInterval = 100;
-				}
-				m_ticker.Start(tickInterval);
+				m_ticker.Start(1500);
 			}
-
-			return true;
 		}
 
 		/// <summary> 
@@ -216,9 +204,8 @@ namespace Automation
 
 		/// <summary> 
 		/// A callback checking before the thread starts
-		/// <returns>Return true to allow the thread to start, false otherwise.</returns>
 		/// </summary>
-		protected virtual bool PreStart() { return true; }
+		protected virtual void PreStart() {}
 
 		/// <summary> 
 		/// Thread started
@@ -228,12 +215,7 @@ namespace Automation
 		/// <summary> 
 		/// Thread stopped
 		/// </summary>
-		protected virtual void OnStop()	{}	
-
-		/// <summary> 
-		/// Called periodically during the thread execution
-		/// </summary>
-		protected virtual void OnTick() {}
+		protected virtual void OnStop()	{}		
 
 		/// <summary> 
 		/// Thread work
@@ -445,29 +427,7 @@ namespace Automation
 			point.Offset(offset);
 			return point;
 		}
-		#endregion
-
-		#region Localizations
-		/// <summary> 
-		/// Register a new locale if not exists		
-		/// <param name="name">Locale name, such as fr-FR, de-DE, ko-KR, etc</param>
-		/// <returns>A Locale object</returns>
-		/// </summary>
-		public static Locale RegisterLocale(string name)
-		{
-			return m_locales.RegisterLocale(name);
-		}
-
-		/// <summary> 
-		/// Translate a text into its localized form using current system locale		
-		/// <param name="key">The en-US form of the text</param>
-		/// <returns>The localized text</returns>
-		/// </summary>
-		public static string Localize(string key)
-		{
-			return m_locales.GetLocalizedString(key);
-		}		
-		#endregion
+		#endregion		
 
 		#region Target Window Mouse Interactions
 		/// <summary> 
@@ -620,26 +580,10 @@ namespace Automation
 
 				m_disposed = true;
 			}
-		}
-
-		private static void RegisterLocales()
-		{
-			Locale locale;
-
-			locale = RegisterLocale("zh-CN");
-			locale["Thread is already running."] = "线程已经在运行中。";
-			locale["Target window not found."] = "目标窗口未找到。";
-			locale["Failed to create device context. "] = "创建DC失败。";
-
-			locale = RegisterLocale("zh-TW");
-			locale["Thread is already running."] = "線程已經在運行中。";
-			locale["Target window not found."] = "目標窗體未找到。";
-			locale["Failed to create device context. "] = "創建DC失敗。";
-		}
+		}		
 		#endregion
 
 		#region Private Members
-		private static LocaleCollection m_locales = new LocaleCollection();
 		private EventThread m_thread = new EventThread();
 		private TickEventThread m_ticker = new TickEventThread();
 		private MemDC m_dc = new MemDC();
@@ -709,8 +653,6 @@ namespace Automation
 			{
 				SetTargetWndForeground();
 			}
-
-			OnTick();
 		}
 		
 		#endregion

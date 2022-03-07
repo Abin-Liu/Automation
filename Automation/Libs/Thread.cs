@@ -6,7 +6,7 @@ namespace MFGLib
 	/// <summary>
 	/// Abstract base class
 	/// </summary>
-	public abstract class GenericThread : IDisposable
+	abstract class GenericThread : IDisposable
 	{
 		/// <summary>
 		/// Check whether the thread is alive
@@ -158,7 +158,7 @@ namespace MFGLib
 	/// <summary>
 	/// A worker thread
 	/// </summary>
-	public abstract class WorkerThread : GenericThread
+	abstract class WorkerThread : GenericThread
 	{
 		/// <summary>
 		/// Called when the thread starts
@@ -213,7 +213,7 @@ namespace MFGLib
 	/// <summary>
 	/// A ticker thread
 	/// </summary>
-	public abstract class TickThread : WorkerThread
+	abstract class TickThread : WorkerThread
 	{
 		/// <summary>
 		/// Interval between every 2 ticks, in milliseconds, default is 200 ms. Only set upon starting to ensure thread safe
@@ -251,7 +251,7 @@ namespace MFGLib
 	/// <summary>
 	///  An event thread
 	/// </summary>
-	public class EventThread : GenericThread
+	class EventThread : GenericThread
 	{
 		/// <summary>
 		/// Called when the thread starts
@@ -302,7 +302,7 @@ namespace MFGLib
 	/// <summary>
 	/// An event ticker thread
 	/// </summary>
-	public class TickEventThread : EventThread
+	class TickEventThread : EventThread
 	{
 		/// <summary>
 		/// Called on every tick 
@@ -348,5 +348,5 @@ namespace MFGLib
 	/// <summary>
 	/// Type definition of event callback functions
 	/// </summary>
-	public delegate void EventThreadHandler();
+	delegate void EventThreadHandler();
 }

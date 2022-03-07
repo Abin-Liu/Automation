@@ -14,7 +14,7 @@ namespace UIToolkits
 	/// <summary>
 	/// 解决MessageBox无法居中显示于父窗体的缺陷
 	/// </summary>
-	public static class MessageBoxPro
+	static class Messagex
 	{
 		#region 常规方法: 与MessageBox相同
 		/// <summary>
@@ -391,7 +391,7 @@ namespace UIToolkits
 			public IntPtr hwnd;
 		};
 
-		static MessageBoxPro()
+		static Messagex()
 		{
 			string Language = System.Globalization.CultureInfo.InstalledUICulture.Name; // 系统当前语言
 			switch (Language)

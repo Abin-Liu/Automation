@@ -11,7 +11,7 @@ namespace Win32API
 	/// <summary>
 	/// A helper class for keyboard and mouse input simulation
 	/// </summary>
-	public class Input
+	class Input
 	{
 		/// <summary>
 		/// Move the mouse to a specified screen location

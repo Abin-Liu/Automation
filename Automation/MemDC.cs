@@ -29,22 +29,22 @@ namespace Automation
 		/// <summary>
 		/// The underlying Bitmap object
 		/// </summary>
-		public Bitmap Bitmap { get; private set; } = null;
+		public Bitmap Bitmap { get; private set; }
 
 		/// <summary>
 		/// Checks whether the object is valid
 		/// </summary>
-		public bool Valid { get { return m_graph != null; } }
+		public bool Valid => m_graph != null;
 
 		/// <summary>
 		/// Width of the underlying bitmap
 		/// </summary>
-		public int Width { get { return Bitmap == null ? 0 : Bitmap.Width; } }
+		public int Width => Bitmap == null ? 0 : Bitmap.Width;
 
 		/// <summary>
 		/// Height of the underlying bitmap
 		/// </summary>
-		public int Height { get { return Bitmap == null ? 0 : Bitmap.Height; } }		
+		public int Height => Bitmap == null ? 0 : Bitmap.Height;	
 
 		/// <summary>
 		/// Dispose the object

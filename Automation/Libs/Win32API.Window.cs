@@ -8,7 +8,7 @@ namespace Win32API
 	/// <summary>
 	/// a helper class for window manipulation
 	/// </summary>
-	public class Window
+	class Window
 	{
 		/// <summary>
 		/// Find a specified window

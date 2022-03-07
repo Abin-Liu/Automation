@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace MFGLib
+namespace UIToolkits
 {
 	/// <summary>
 	/// Key-value map for locale strings
 	/// </summary>
-	public sealed class Locale
+	sealed class Locale
 	{
 		/// <summary>
 		/// Get or set locale values by key
@@ -67,7 +67,7 @@ namespace MFGLib
 	/// <summary>
 	/// Locale collection
 	/// </summary>
-	public sealed class LocaleCollection
+	sealed class LocaleCollection
 	{
 		/// <summary>
 		/// Get system locale: en-US, zh-CN, zh-TW, etc

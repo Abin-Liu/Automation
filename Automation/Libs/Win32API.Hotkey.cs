@@ -7,7 +7,7 @@ namespace Win32API
 	/// <summary>
 	/// A helper class for system hot key registration
 	/// </summary>
-	public class Hotkey
+	class Hotkey
 	{
 		const int WM_HOTKEY = 0x0312;
 		const int MOD_ALT = 0x01;
