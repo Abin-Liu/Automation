@@ -12,6 +12,11 @@ namespace Automation.DemoApp
 			return FindWindow("Notepad", null);
 		}
 
+		protected override void PreStart()
+		{
+			throw new Exception("PreStart Exception");
+		}
+
 		protected override void ThreadProc()
 		{
 			// Clear texts

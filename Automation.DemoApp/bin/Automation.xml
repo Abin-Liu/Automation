@@ -465,34 +465,29 @@
             Release unmanaged resources such as device context
             </summary>
         </member>
-        <member name="T:Automation.Localization.Locales">
+        <member name="T:Automation.Localization">
             <summary>
             Localization
             </summary>
         </member>
-        <member name="M:Automation.Localization.Locales.Register(System.String,System.Collections.Generic.IDictionary{System.String,System.String})">
-            <summary>
-            Register a new locale
-            </summary>
-            <param name="name">Locale name</param>
-            <param name="contents">String set for the locale</param>
-        </member>
-        <member name="M:Automation.Localization.Locales.Get(System.String)">
+        <member name="M:Automation.Localization.Get(System.String)">
             <summary>
             Query for a localized string
             </summary>
             <param name="key">Query key</param>
             <returns>Returns the localized string, or the key itself if not exists</returns>
         </member>
-        <member name="T:Automation.Localization.zhCN">
+        <member name="M:Automation.Localization.#cctor">
             <summary>
-            Localization: Chinese simplified
+            Static c'tor
             </summary>
         </member>
-        <member name="T:Automation.Localization.zhTW">
+        <member name="M:Automation.Localization.Register(System.String,System.Collections.Generic.IDictionary{System.String,System.String})">
             <summary>
-            Localization: Chinese traditional
+            Register a new locale
             </summary>
+            <param name="name">Locale name</param>
+            <param name="contents">String set for the locale</param>
         </member>
         <member name="T:Automation.MemDC">
             <summary>

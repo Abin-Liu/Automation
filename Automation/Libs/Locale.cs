@@ -21,8 +21,12 @@ namespace UIToolkits
 				}
 
 				string value = null;
-				m_map.TryGetValue(key, out value);
-				return value;
+				if (m_map.TryGetValue(key, out value))
+				{
+					return value;
+				}
+				
+				return key;
 			}
 
 			set
