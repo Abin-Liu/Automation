@@ -53,9 +53,7 @@
     <Compile Include="Libs\Win32API.Hotkey.cs" />
     <Compile Include="Libs\Win32API.Input.cs" />
     <Compile Include="Libs\Win32API.Window.cs" />
-    <Compile Include="Localization\Locales.cs" />
-    <Compile Include="Localization\zhCN.cs" />
-    <Compile Include="Localization\zhTW.cs" />
+    <Compile Include="Localization.cs" />
     <Compile Include="MemDC.cs" />
     <Compile Include="Libs\Thread.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
