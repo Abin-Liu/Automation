@@ -14,7 +14,6 @@ namespace Automation.DemoApp
 
 		protected override void PreStart()
 		{
-			throw new Exception("PreStart Exception");
 		}
 
 		protected override void ThreadProc()

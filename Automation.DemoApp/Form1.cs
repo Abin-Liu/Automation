@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using Automation;
-using Automation.Utils;
 using UIToolkits;
 
 namespace Automation.DemoApp

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using Win32API;
 using UIToolkits;
+using Automation.Utils;
 
 namespace Automation
 {
@@ -72,7 +73,7 @@ namespace Automation
 			}			
 			catch (Exception ex)
 			{
-				Messagex.Error(this, Localization.Get(ex.Message));
+				Messagex.Error(this, LangManager.Get(ex.Message));
 			}
 		}
 
@@ -92,7 +93,7 @@ namespace Automation
 			}
 			catch (Exception ex)
 			{
-				Messagex.Error(this, Localization.Get(ex.Message));
+				Messagex.Error(this, LangManager.Get(ex.Message));
 			}
 		}
 
@@ -272,7 +273,7 @@ namespace Automation
 			if (m_thread != null && m_thread.IsAlive)
 			{
 				// Display a confirmation is the thread is alive
-				cancel = !Messagex.Confirm(this, Localization.Get("The thread is still running, exit anyway?"));
+				cancel = !Messagex.Confirm(this, LangManager.Get("The thread is still running, exit anyway?"));
 			}
 
 			// Cleanup before close
