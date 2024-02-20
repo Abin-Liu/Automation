@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace MFGLib
+namespace AbinLibs
 {
 	/// <summary>
 	/// Abstract base class

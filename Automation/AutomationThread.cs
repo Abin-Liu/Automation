@@ -4,7 +4,7 @@ using System.Media;
 using System.Threading;
 using System.Windows.Forms;
 using Win32API;
-using MFGLib;
+using AbinLibs;
 
 namespace Automation
 {
@@ -17,7 +17,12 @@ namespace Automation
 		/// <summary>
 		/// Handle of the target window
 		/// </summary>
-		public IntPtr TargetWnd { get; protected set; } = IntPtr.Zero;
+		public IntPtr TargetWnd { get; private set; } = IntPtr.Zero;
+
+		/// <summary>
+		/// Checks whether there's a target window
+		/// </summary>
+		public bool HasTargetWnd => TargetWnd != IntPtr.Zero;
 
 		/// <summary> 
 		/// Client rectangle of the target window, top-left is always 0,0
@@ -37,12 +42,7 @@ namespace Automation
 		/// <summary> 
 		/// Thread error messages used by message window
 		/// </summary> 
-		public string LastError { get; protected set; }
-
-		/// <summary>
-		/// Turn on/off beep sounds for thread start/stop
-		/// </summary>
-		public bool EnableBeeps { get; set; }
+		public string LastError { get; protected set; }		
 
 		/// <summary> 
 		/// Start or stop sound alarm
@@ -195,12 +195,30 @@ namespace Automation
 
 		#endregion
 
+		#region Sound Beeps
+		/// <summary>
+		/// Play a short prompting beep sound
+		/// </summary>
+		/// <param name="start">Play start.wav is true, play stop.wav otherwise</param>
+		public void Beep(bool start = true)
+		{
+			if (start)
+			{
+				m_soundPlayerStart.Play();
+			}
+			else
+			{
+				m_soundPlayerStop.Play();				
+			}
+		}
+		#endregion
+
 		#region Overrides
 		/// <summary>
 		/// Find handle of the target window which the thread is dealing with
 		/// </summary>
 		/// <returns>Handle of the target window, or IntPtr.Zero if not exists</returns>
-		public abstract IntPtr FindTargetWnd();
+		protected abstract IntPtr FindTargetWnd();
 
 		/// <summary> 
 		/// A callback checking before the thread starts
@@ -245,11 +263,19 @@ namespace Automation
 		#region Target Window  Interactions
 
 		/// <summary>
+		/// Retrieve/update target window handle
+		/// </summary>
+		public virtual void UpdateTargetWnd()
+		{
+			TargetWnd = FindTargetWnd();
+		}
+
+		/// <summary>
 		/// Static method to find a window using class and title
 		/// </summary>
 		/// <param name="windowClass">Class name of the window, null to ignore</param>
 		/// <param name="windowName">Window title of the window, null to ignore</param>
-		/// <returns></returns>
+		/// <returns>Return target window handle</returns>
 		public static IntPtr FindWindow(string windowClass, string windowName)
 		{
 			return Window.FindWindow(windowClass, windowName);
@@ -438,7 +464,13 @@ namespace Automation
 		/// </summary>
 		public void MouseClick(int x, int y, MouseButtons button = MouseButtons.Left)
 		{
-			MouseMove(x, y);
+			if (!IsTargetWndForeground())
+			{
+				return;
+			}
+
+			Point offset = ClientToScreen;
+			Input.SetCursorPos(x + offset.X, y + offset.Y);
 			Input.MouseClick(button);
 		}
 
@@ -449,6 +481,11 @@ namespace Automation
 		/// </summary>
 		public void MouseMove(int x, int y)
 		{
+			if (!IsTargetWndForeground())
+			{
+				return;
+			}
+
 			Point offset = ClientToScreen;
 			Input.SetCursorPos(x + offset.X, y + offset.Y);
 		}
@@ -463,6 +500,11 @@ namespace Automation
 		/// <param name="button">The button to be held down</param>
 		public void MouseDrag(int x1, int y1, int x2, int y2, MouseButtons button = MouseButtons.Left)
 		{
+			if (!IsTargetWndForeground())
+			{
+				return;
+			}
+
 			Point offset = ClientToScreen;
 			Input.MouseDrag(x1 + offset.X, y1 + offset.Y, x2 + offset.X, y2 + offset.Y, button);
 		}
@@ -471,8 +513,13 @@ namespace Automation
 		/// Press down a mouse button
 		/// <param name="button">Mouse button</param> 
 		/// </summary>
-		public static void MouseDown(MouseButtons button = MouseButtons.Left)
+		public void MouseDown(MouseButtons button = MouseButtons.Left)
 		{
+			if (!IsTargetWndForeground())
+			{
+				return;
+			}
+
 			Input.MouseDown(button);
 		}
 
@@ -480,8 +527,13 @@ namespace Automation
 		/// Release a mouse button
 		/// <param name="button">Mouse button</param> 
 		/// </summary>
-		public static void MouseUp(MouseButtons button = MouseButtons.Left)
+		public void MouseUp(MouseButtons button = MouseButtons.Left)
 		{
+			if (!IsTargetWndForeground())
+			{
+				return;
+			}
+
 			Input.MouseUp(button);
 		}
 
@@ -489,8 +541,13 @@ namespace Automation
 		/// Scroll the mouse wheel
 		/// <param name="scrollUp">Wheel direction</param> 
 		/// </summary>
-		public static void MouseWheel(bool scrollUp = false)
+		public void MouseWheel(bool scrollUp = false)
 		{
+			if (!IsTargetWndForeground())
+			{
+				return;
+			}
+
 			Input.MouseWheel(scrollUp);
 		}
 		#endregion
@@ -502,10 +559,15 @@ namespace Automation
 		/// <param name="key">Keys value</param>
 		/// <param name="mods">Modifiers</param>
 		/// </summary>
-		public static void KeyStroke(Keys key, Keys mods = Keys.None)
+		public void KeyStroke(Keys key, Keys mods = Keys.None)
 		{
-			KeyDown(key, mods);			
-			KeyUp(key, mods);
+			if (!IsTargetWndForeground())
+			{
+				return;
+			}
+
+			Input.KeyDown(key, mods);
+			Input.KeyUp(key, mods);
 		}		
 
 		/// <summary> 
@@ -513,8 +575,13 @@ namespace Automation
 		/// <param name="keys">The string defines keys to be sent, same format as System.Windows.SendKeys</param>
 		/// <param name="delay">Delay between each 2 key, in milliseconds</param>
 		/// </summary>
-		public static void KeyStroke(string keys, int delay = 0)
+		public void KeyStroke(string keys, int delay = 0)
 		{
+			if (!IsTargetWndForeground())
+			{
+				return;
+			}
+
 			Input.KeyStroke(keys, delay);
 		}
 
@@ -523,8 +590,13 @@ namespace Automation
 		/// <param name="key">Keys value</param>
 		/// <param name="mods">Modifiers</param>
 		/// </summary>
-		public static void KeyDown(Keys key, Keys mods = Keys.None)
+		public void KeyDown(Keys key, Keys mods = Keys.None)
 		{
+			if (!IsTargetWndForeground())
+			{
+				return;
+			}
+
 			Input.KeyDown(key, mods);
 		}
 
@@ -533,8 +605,13 @@ namespace Automation
 		/// <param name="key">Keys value</param>
 		/// <param name="mods">Modifiers</param>
 		/// </summary>
-		public static void KeyUp(Keys key, Keys mods = Keys.None)
+		public void KeyUp(Keys key, Keys mods = Keys.None)
 		{
+			if (!IsTargetWndForeground())
+			{
+				return;
+			}
+
 			Input.KeyUp(key, mods);
 		}
 
@@ -543,7 +620,7 @@ namespace Automation
 		/// </summary>
 		/// <param name="key">Keys value</param>
 		/// <returns>Return true if the specified key is held down, false otherwise.</returns>
-		public static bool IsKeyDown(Keys key)
+		public bool IsKeyDown(Keys key)
 		{
 			return Input.IsKeyDown(key);
 		}
@@ -602,11 +679,6 @@ namespace Automation
 
 		private void _OnStart()
 		{
-			if (EnableBeeps)
-			{
-				m_soundPlayerStart.Play();
-			}
-
 			if (TargetWnd != IntPtr.Zero && !IsTargetWndForeground())
 			{
 				SetTargetWndForeground();
@@ -618,10 +690,6 @@ namespace Automation
 
 		private void _OnStop()
 		{
-			if (EnableBeeps)
-			{
-				m_soundPlayerStop.Play();
-			}
 			m_ticker.Stop();
 			OnStop();
 			PostMessage(THREAD_MSG_STOP, 0);
