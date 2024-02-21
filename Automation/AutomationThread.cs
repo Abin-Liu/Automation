@@ -89,7 +89,22 @@ namespace Automation
 		/// <summary> 
 		/// Pause or resume the thread
 		/// </summary> 
-		public bool Paused { get; set; }		
+		public bool Paused { get; set; }	
+		
+		/// <summary>
+		/// Time when thread started
+		/// </summary>
+		public DateTime StartTime { get; private set; }
+
+		/// <summary>
+		/// Time when thread ended
+		/// </summary>
+		public DateTime EndTime { get; private set; }
+
+		/// <summary>
+		/// Total time the thread had run
+		/// </summary>
+		public TimeSpan RunTime => EndTime < StartTime ? DateTime.Now - StartTime : EndTime - StartTime;
 		#endregion
 
 		#region C'tors
@@ -679,6 +694,9 @@ namespace Automation
 
 		private void _OnStart()
 		{
+			StartTime = DateTime.Now;
+			EndTime = DateTime.MinValue;
+
 			if (TargetWnd != IntPtr.Zero && !IsTargetWndForeground())
 			{
 				SetTargetWndForeground();
@@ -690,6 +708,7 @@ namespace Automation
 
 		private void _OnStop()
 		{
+			EndTime = DateTime.Now;
 			m_ticker.Stop();
 			OnStop();
 			PostMessage(THREAD_MSG_STOP, 0);

@@ -193,6 +193,21 @@
             Pause or resume the thread
             </summary> 
         </member>
+        <member name="P:Automation.AutomationThread.StartTime">
+            <summary>
+            Time when thread started
+            </summary>
+        </member>
+        <member name="P:Automation.AutomationThread.EndTime">
+            <summary>
+            Time when thread ended
+            </summary>
+        </member>
+        <member name="P:Automation.AutomationThread.RunTime">
+            <summary>
+            Total time the thread had run
+            </summary>
+        </member>
         <member name="M:Automation.AutomationThread.#ctor">
             <summary> 
             Default constructor
