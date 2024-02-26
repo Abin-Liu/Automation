@@ -287,6 +287,11 @@
             <param name="lParam">lParam</param> 		/// 
             </summary>
         </member>
+        <member name="M:Automation.AutomationThread.PrepareTargetWnd">
+            <summary>
+            Update target window and make sure it's foreground, also reset cursor location
+            </summary>
+        </member>
         <member name="M:Automation.AutomationThread.UpdateTargetWnd">
             <summary>
             Retrieve/update target window handle
@@ -401,6 +406,11 @@
             Client coords to screen coords
             <param name="point">Client coords</param> 
             <returns>Screen coords</returns>
+            </summary>
+        </member>
+        <member name="M:Automation.AutomationThread.ResetMouse">
+            <summary>
+            Put mouse cursor to a safe location to avoid triggering any unexpected elements
             </summary>
         </member>
         <member name="M:Automation.AutomationThread.MouseClick(System.Int32,System.Int32,System.Windows.Forms.MouseButtons)">

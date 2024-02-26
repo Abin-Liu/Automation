@@ -278,6 +278,27 @@ namespace Automation
 		#region Target Window  Interactions
 
 		/// <summary>
+		/// Update target window and make sure it's foreground, also reset cursor location
+		/// </summary>
+		public virtual void PrepareTargetWnd()
+		{
+			TargetWnd = FindTargetWnd();
+			if (TargetWnd == IntPtr.Zero)
+			{
+				throw new Exception("Target window not found.");
+			}
+
+			if (IsTargetWndForeground())
+			{
+				return;
+			}
+
+			SetTargetWndForeground();
+			Sleep(1000);
+			ResetMouse();
+		}
+
+		/// <summary>
 		/// Retrieve/update target window handle
 		/// </summary>
 		public virtual void UpdateTargetWnd()
@@ -471,6 +492,13 @@ namespace Automation
 		#endregion		
 
 		#region Target Window Mouse Interactions
+		/// <summary>
+		/// Put mouse cursor to a safe location to avoid triggering any unexpected elements
+		/// </summary>
+		public virtual void ResetMouse()
+		{
+		}
+
 		/// <summary> 
 		/// Click a mouse button inside the target window's client area
 		/// <param name="x">Client x coords</param> 
