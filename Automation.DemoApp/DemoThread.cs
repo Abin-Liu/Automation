@@ -7,7 +7,7 @@ namespace Automation.DemoApp
 {
 	class DemoThread : AutomationThread
 	{
-		public override IntPtr FindTargetWnd()
+		protected override IntPtr FindTargetWnd()
 		{
 			return FindWindow("Notepad", null);
 		}

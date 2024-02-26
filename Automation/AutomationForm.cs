@@ -15,27 +15,27 @@ namespace Automation
 		/// <summary>
 		/// If true, the thread will periadically set target window foreground
 		/// </summary>
-		public virtual bool AutoForeground { get; }
+		protected virtual bool AutoForeground { get; }
 
 		/// <summary>
 		/// Whether hide main form (using a notification icon?)
 		/// </summary>
-		public virtual bool HideMainForm { get; }		
+		protected virtual bool HideMainForm { get; }
 
 		/// <summary>
 		/// Whether the thread is running
 		/// </summary>
-		public virtual bool IsAlive => m_thread != null && m_thread.IsAlive;
+		protected virtual bool IsAlive => m_thread != null && m_thread.IsAlive;
 
 		/// <summary>
 		/// Whether the thread was stopped by user
 		/// </summary>
-		public bool Aborted => m_thread != null && m_thread.Aborted;
+		protected bool Aborted => m_thread != null && m_thread.Aborted;
 
 		/// <summary>
 		/// Handle of the target window
 		/// </summary>
-		public IntPtr TargetWnd => m_thread != null ? m_thread.TargetWnd : IntPtr.Zero;		
+		protected IntPtr TargetWnd => m_thread != null ? m_thread.TargetWnd : IntPtr.Zero;		
 
 		/// <summary>
 		/// Default constructor
@@ -51,7 +51,7 @@ namespace Automation
 		/// Set the thread member
 		/// <param name="thread">An object derived from AutomationThread</param> 
 		/// </summary>
-		public virtual void SetThread(AutomationThread thread)
+		protected virtual void SetThread(AutomationThread thread)
 		{
 			m_thread = thread;
 		}
@@ -60,7 +60,7 @@ namespace Automation
 		/// Start the thread
 		/// <returns>Return true if the thread starts successfully, false otherwise.</returns>
 		/// </summary>
-		public virtual void StartThread()
+		protected virtual void StartThread()
 		{
 			if (m_thread == null)
 			{
@@ -80,7 +80,7 @@ namespace Automation
 		/// <summary>
 		/// Stop the thread
 		/// </summary>
-		public virtual void StopThread()
+		protected virtual void StopThread()
 		{
 			if (m_thread == null)
 			{
@@ -100,7 +100,7 @@ namespace Automation
 		/// <summary>
 		/// Toggle the thread
 		/// </summary>
-		public virtual void ToggleThread()
+		protected virtual void ToggleThread()
 		{
 			if (m_thread == null)
 			{
@@ -115,12 +115,12 @@ namespace Automation
 			{
 				StartThread();
 			}
-		}		
+		}
 
 		/// <summary>
 		/// 显示本窗口并置于前台
 		/// </summary>
-		public void ShowForm()
+		protected void ShowForm()
 		{
 			if (Window.GetForegroundWindow() == Handle)
 			{
