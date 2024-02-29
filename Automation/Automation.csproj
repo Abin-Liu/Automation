@@ -48,6 +48,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="AutomationThread.cs" />
+    <Compile Include="ForegroundModes.cs" />
     <Compile Include="Libs\Locale.cs" />
     <Compile Include="Libs\Messagex.cs" />
     <Compile Include="Libs\Win32API.Hotkey.cs" />

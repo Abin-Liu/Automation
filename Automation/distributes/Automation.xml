@@ -9,11 +9,6 @@
             A Form derived class controls AutomationThread
             </summary>
         </member>
-        <member name="P:Automation.AutomationForm.AutoForeground">
-            <summary>
-            If true, the thread will periadically set target window foreground
-            </summary>
-        </member>
         <member name="P:Automation.AutomationForm.HideMainForm">
             <summary>
             Whether hide main form (using a notification icon?)
@@ -168,6 +163,11 @@
             Win32 ScreenToClient offset
             </summary>
         </member>
+        <member name="P:Automation.AutomationThread.ForegroundMode">
+            <summary>
+            Auto foregrounding mode
+            </summary>
+        </member>
         <member name="P:Automation.AutomationThread.LastError">
             <summary> 
             Thread error messages used by message window
@@ -218,11 +218,10 @@
             Destructor
             </summary>
         </member>
-        <member name="M:Automation.AutomationThread.Start(System.Windows.Forms.Form,System.Boolean)">
+        <member name="M:Automation.AutomationThread.Start(System.Windows.Forms.Form)">
             <summary> 
             Start the thread
             <param name="messageForm">The window which receives thread messages, usually the main form</param>
-            <param name="autoForeground">If true, the thread will periadically set target window foreground</param> 
             </summary>
         </member>
         <member name="M:Automation.AutomationThread.Stop">
@@ -408,6 +407,12 @@
             <returns>Screen coords</returns>
             </summary>
         </member>
+        <member name="M:Automation.AutomationThread.CursorInClient">
+            <summary>
+            Checks wether cursor in in target client rectangle
+            </summary>
+            <returns>Return true if cursor is in client rectangle, false otherwise</returns>
+        </member>
         <member name="M:Automation.AutomationThread.ResetMouse">
             <summary>
             Put mouse cursor to a safe location to avoid triggering any unexpected elements
@@ -499,6 +504,26 @@
         <member name="M:Automation.AutomationThread.Dispose(System.Boolean)">
             <summary> 
             Release unmanaged resources such as device context
+            </summary>
+        </member>
+        <member name="T:Automation.ForegroundModes">
+            <summary>
+            Target window auto foregrounding mode
+            </summary>
+        </member>
+        <member name="F:Automation.ForegroundModes.Never">
+            <summary>
+            Never auto foregrounding
+            </summary>
+        </member>
+        <member name="F:Automation.ForegroundModes.Always">
+            <summary>
+            Always auto foregrounding
+            </summary>
+        </member>
+        <member name="F:Automation.ForegroundModes.CursorInClient">
+            <summary>
+            Only auto foregrounding when cursor is in client rectangle
             </summary>
         </member>
         <member name="T:Automation.Utils.LangBase">

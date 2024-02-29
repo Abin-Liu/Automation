@@ -39,6 +39,11 @@ namespace Automation
 		/// </summary>
 		public Point ScreenToClient => Window.ScreenToClient(TargetWnd);
 
+		/// <summary>
+		/// Auto foregrounding mode
+		/// </summary>
+		public ForegroundModes ForegroundMode { get; set; } = ForegroundModes.Never;
+
 		/// <summary> 
 		/// Thread error messages used by message window
 		/// </summary> 
@@ -132,9 +137,8 @@ namespace Automation
 		/// <summary> 
 		/// Start the thread
 		/// <param name="messageForm">The window which receives thread messages, usually the main form</param>
-		/// <param name="autoForeground">If true, the thread will periadically set target window foreground</param> 
 		/// </summary>
-		public virtual void Start(Form messageForm, bool autoForeground)
+		public virtual void Start(Form messageForm)
 		{
 			if (IsAlive)
 			{
@@ -154,12 +158,7 @@ namespace Automation
 
 			m_messageWnd = messageForm.Handle;
 			m_thread.Start();
-
-			// Start the ticker
-			if (autoForeground)
-			{
-				m_ticker.Start(1500);
-			}
+			m_ticker.Start(1500);
 		}
 
 		/// <summary> 
@@ -489,9 +488,20 @@ namespace Automation
 			point.Offset(offset);
 			return point;
 		}
-		#endregion		
+		#endregion
 
 		#region Target Window Mouse Interactions
+		/// <summary>
+		/// Checks wether cursor in in target client rectangle
+		/// </summary>
+		/// <returns>Return true if cursor is in client rectangle, false otherwise</returns>
+		public bool CursorInClient()
+		{
+			Point pt = Input.GetCursorPos();
+			pt.Offset(ScreenToClient);
+			return ClientRect.Contains(pt);
+		}
+
 		/// <summary>
 		/// Put mouse cursor to a safe location to avoid triggering any unexpected elements
 		/// </summary>
@@ -764,12 +774,31 @@ namespace Automation
 
 			// Make sure the target window is foreground unless the message window is, in which case the user may be configuring
 			IntPtr foregroundWnd = Window.GetForegroundWindow();
-			if (foregroundWnd != TargetWnd && foregroundWnd != m_messageWnd)
+			if (foregroundWnd == TargetWnd || foregroundWnd == m_messageWnd)
+			{
+				return;
+			}
+
+			bool needForeground = false;
+			switch (ForegroundMode)
+			{
+				case ForegroundModes.Always:
+					needForeground = true;
+					break;
+
+				case ForegroundModes.CursorInClient:
+					needForeground = CursorInClient();
+					break;
+
+				default:
+					break;
+			}
+
+			if (needForeground)
 			{
 				SetTargetWndForeground();
 			}
 		}
-		
 		#endregion
 	}
 }

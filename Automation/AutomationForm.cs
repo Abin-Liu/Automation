@@ -13,11 +13,6 @@ namespace Automation
 	public class AutomationForm : Form
 	{
 		/// <summary>
-		/// If true, the thread will periadically set target window foreground
-		/// </summary>
-		protected virtual bool AutoForeground { get; }
-
-		/// <summary>
 		/// Whether hide main form (using a notification icon?)
 		/// </summary>
 		protected virtual bool HideMainForm { get; }
@@ -69,7 +64,7 @@ namespace Automation
 
 			try
 			{
-				m_thread.Start(this, AutoForeground);
+				m_thread.Start(this);
 			}			
 			catch (Exception ex)
 			{
@@ -261,7 +256,7 @@ namespace Automation
 			{
 				Hide();
 				ShowInTaskbar = false;
-			}			
+			}
 		}
 
 		/// <summary>
