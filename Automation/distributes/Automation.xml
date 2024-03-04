@@ -188,11 +188,6 @@
             Whether the thread was aborted by user
             </summary> 
         </member>
-        <member name="P:Automation.AutomationThread.Paused">
-            <summary> 
-            Pause or resume the thread
-            </summary> 
-        </member>
         <member name="P:Automation.AutomationThread.StartTime">
             <summary>
             Time when thread started
@@ -205,7 +200,22 @@
         </member>
         <member name="P:Automation.AutomationThread.RunTime">
             <summary>
-            Total time the thread had run
+            Total time the thread had run, in seconds
+            </summary>
+        </member>
+        <member name="P:Automation.AutomationThread.RunTimeText">
+            <summary>
+            Total time the thread had run, in "H:mm:ss" format
+            </summary>
+        </member>
+        <member name="P:Automation.AutomationThread.RoundCount">
+            <summary>
+            Rounds processed (derived classes will define what a round is)
+            </summary>
+        </member>
+        <member name="P:Automation.AutomationThread.SecondsPerRound">
+            <summary>
+            Average number of seconds a round takes
             </summary>
         </member>
         <member name="M:Automation.AutomationThread.#ctor">
@@ -318,12 +328,6 @@
         <member name="M:Automation.AutomationThread.WaitTargetWndForeground">
             <summary>
             Wait until the target window is foreground
-            </summary>
-        </member>
-        <member name="M:Automation.AutomationThread.DelayBeforeAction(System.Int32)">
-            <summary> 
-            Apply a delay before sending an action for stablity, also check for thread pause status.
-            <param name="milliseconds">Delay in milliseconds</param> 
             </summary>
         </member>
         <member name="M:Automation.AutomationThread.GetPixel(System.Int32,System.Int32)">

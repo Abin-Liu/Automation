@@ -89,12 +89,7 @@ namespace Automation
 		/// <summary> 
 		/// Whether the thread was aborted by user
 		/// </summary> 
-		public bool Aborted => m_thread.Aborted;
-
-		/// <summary> 
-		/// Pause or resume the thread
-		/// </summary> 
-		public bool Paused { get; set; }	
+		public bool Aborted => m_thread.Aborted;		
 		
 		/// <summary>
 		/// Time when thread started
@@ -107,9 +102,31 @@ namespace Automation
 		public DateTime EndTime { get; private set; }
 
 		/// <summary>
-		/// Total time the thread had run
+		/// Total time the thread had run, in seconds
 		/// </summary>
-		public TimeSpan RunTime => EndTime < StartTime ? DateTime.Now - StartTime : EndTime - StartTime;
+		public int RunTime => (int)(EndTime >= StartTime ? EndTime - StartTime : DateTime.Now - StartTime).TotalSeconds;
+
+		/// <summary>
+		/// Total time the thread had run, in "H:mm:ss" format
+		/// </summary>
+		public string RunTimeText
+		{
+			get
+			{
+				var span = TimeSpan.FromSeconds(RunTime);				
+				return string.Format("{0}:{1:D2}:{2:D2}", span.Hours, span.Minutes, span.Seconds);
+			}
+		}
+
+		/// <summary>
+		/// Rounds processed (derived classes will define what a round is)
+		/// </summary>
+		public int RoundCount { get; protected set; }
+
+		/// <summary>
+		/// Average number of seconds a round takes
+		/// </summary>
+		public int SecondsPerRound => RoundCount > 0 ? RunTime / RoundCount : 0;
 		#endregion
 
 		#region C'tors
@@ -152,7 +169,6 @@ namespace Automation
 			}
 
 			LastError = null;
-			Paused = false;
 
 			PreStart();
 
@@ -183,7 +199,7 @@ namespace Automation
 		/// Sync lock
 		/// <param name="locker">Object to lock, use internal locker if null</param> 
 		/// </summary>
-		public void Lock(object locker = null)
+		protected void Lock(object locker = null)
 		{
 			if (locker == null)
 			{
@@ -197,7 +213,7 @@ namespace Automation
 		/// Sync unlock
 		/// <param name="locker">Object to unlock, use internal locker if null</param> 
 		/// </summary>
-		public void Unlock(object locker = null)
+		protected void Unlock(object locker = null)
 		{
 			if (locker == null)
 			{
@@ -357,20 +373,7 @@ namespace Automation
 			{
 				Sleep(1000);
 			}
-		}
-
-		/// <summary> 
-		/// Apply a delay before sending an action for stablity, also check for thread pause status.
-		/// <param name="milliseconds">Delay in milliseconds</param> 
-		/// </summary>
-		public void DelayBeforeAction(int milliseconds = 500)
-		{
-			Sleep(milliseconds);
-			while (_NeedPauseThreads())
-			{
-				Sleep(2000);
-			}
-		}
+		}		
 		#endregion
 
 		#region Target Window Pixel Access
@@ -723,12 +726,7 @@ namespace Automation
 		private SoundPlayer m_soundPlayerStart = new SoundPlayer(Resources.ResourceManager.GetStream("Start"));
 		private SoundPlayer m_soundPlayerStop = new SoundPlayer(Resources.ResourceManager.GetStream("Stop"));
 		private SoundPlayer m_soundPlayerAlert = new SoundPlayer(Resources.ResourceManager.GetStream("Alert"));		
-		private bool m_disposed = false;
-
-		private bool _NeedPauseThreads()
-		{
-			return Paused || Window.GetForegroundWindow() == m_messageWnd;
-		}
+		private bool m_disposed = false;		
 
 		private void _OnStart()
 		{
@@ -760,7 +758,7 @@ namespace Automation
 		// Check status of the target window periodically
 		private void _OnTick()
 		{
-			if (TargetWnd == IntPtr.Zero || _NeedPauseThreads())
+			if (TargetWnd == IntPtr.Zero)
 			{
 				return;
 			}

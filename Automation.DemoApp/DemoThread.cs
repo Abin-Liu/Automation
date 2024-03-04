@@ -20,9 +20,9 @@ namespace Automation.DemoApp
 		{
 			// Clear texts
 			KeyStroke(Keys.A, Keys.Control);
-			DelayBeforeAction(600);
+			Sleep(500);
 			KeyStroke(Keys.Back);
-			DelayBeforeAction(600);
+			Sleep(500);
 
 			// Input at 10 speed of 10 chars per second			
 			KeyStroke(TEST_CONTENTS, 100);

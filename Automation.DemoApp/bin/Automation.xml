@@ -9,11 +9,6 @@
             A Form derived class controls AutomationThread
             </summary>
         </member>
-        <member name="P:Automation.AutomationForm.AutoForeground">
-            <summary>
-            If true, the thread will periadically set target window foreground
-            </summary>
-        </member>
         <member name="P:Automation.AutomationForm.HideMainForm">
             <summary>
             Whether hide main form (using a notification icon?)
@@ -168,6 +163,11 @@
             Win32 ScreenToClient offset
             </summary>
         </member>
+        <member name="P:Automation.AutomationThread.ForegroundMode">
+            <summary>
+            Auto foregrounding mode
+            </summary>
+        </member>
         <member name="P:Automation.AutomationThread.LastError">
             <summary> 
             Thread error messages used by message window
@@ -188,11 +188,6 @@
             Whether the thread was aborted by user
             </summary> 
         </member>
-        <member name="P:Automation.AutomationThread.Paused">
-            <summary> 
-            Pause or resume the thread
-            </summary> 
-        </member>
         <member name="P:Automation.AutomationThread.StartTime">
             <summary>
             Time when thread started
@@ -205,7 +200,22 @@
         </member>
         <member name="P:Automation.AutomationThread.RunTime">
             <summary>
-            Total time the thread had run
+            Total time the thread had run, in seconds
+            </summary>
+        </member>
+        <member name="P:Automation.AutomationThread.RunTimeText">
+            <summary>
+            Total time the thread had run, in "H:mm:ss" format
+            </summary>
+        </member>
+        <member name="P:Automation.AutomationThread.RoundCount">
+            <summary>
+            Rounds processed (derived classes will define what a round is)
+            </summary>
+        </member>
+        <member name="P:Automation.AutomationThread.SecondsPerRound">
+            <summary>
+            Average number of seconds a round takes
             </summary>
         </member>
         <member name="M:Automation.AutomationThread.#ctor">
@@ -218,11 +228,10 @@
             Destructor
             </summary>
         </member>
-        <member name="M:Automation.AutomationThread.Start(System.Windows.Forms.Form,System.Boolean)">
+        <member name="M:Automation.AutomationThread.Start(System.Windows.Forms.Form)">
             <summary> 
             Start the thread
             <param name="messageForm">The window which receives thread messages, usually the main form</param>
-            <param name="autoForeground">If true, the thread will periadically set target window foreground</param> 
             </summary>
         </member>
         <member name="M:Automation.AutomationThread.Stop">
@@ -321,12 +330,6 @@
             Wait until the target window is foreground
             </summary>
         </member>
-        <member name="M:Automation.AutomationThread.DelayBeforeAction(System.Int32)">
-            <summary> 
-            Apply a delay before sending an action for stablity, also check for thread pause status.
-            <param name="milliseconds">Delay in milliseconds</param> 
-            </summary>
-        </member>
         <member name="M:Automation.AutomationThread.GetPixel(System.Int32,System.Int32)">
             <summary> 
             Read pixel RGB value from client area of the target window.
@@ -407,6 +410,12 @@
             <param name="point">Client coords</param> 
             <returns>Screen coords</returns>
             </summary>
+        </member>
+        <member name="M:Automation.AutomationThread.CursorInClient">
+            <summary>
+            Checks wether cursor in in target client rectangle
+            </summary>
+            <returns>Return true if cursor is in client rectangle, false otherwise</returns>
         </member>
         <member name="M:Automation.AutomationThread.ResetMouse">
             <summary>
@@ -499,6 +508,26 @@
         <member name="M:Automation.AutomationThread.Dispose(System.Boolean)">
             <summary> 
             Release unmanaged resources such as device context
+            </summary>
+        </member>
+        <member name="T:Automation.ForegroundModes">
+            <summary>
+            Target window auto foregrounding mode
+            </summary>
+        </member>
+        <member name="F:Automation.ForegroundModes.Never">
+            <summary>
+            Never auto foregrounding
+            </summary>
+        </member>
+        <member name="F:Automation.ForegroundModes.Always">
+            <summary>
+            Always auto foregrounding
+            </summary>
+        </member>
+        <member name="F:Automation.ForegroundModes.CursorInClient">
+            <summary>
+            Only auto foregrounding when cursor is in client rectangle
             </summary>
         </member>
         <member name="T:Automation.Utils.LangBase">
