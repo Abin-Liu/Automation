@@ -126,7 +126,7 @@ namespace Automation
 		/// <summary>
 		/// Average number of seconds a round takes
 		/// </summary>
-		public int SecondsPerRound => RoundCount > 0 ? RunTime / RoundCount : 0;
+		public int SecondsPerRound => RoundCount > 1 ?  RunTime / RoundCount : RunTime;
 		#endregion
 
 		#region C'tors
