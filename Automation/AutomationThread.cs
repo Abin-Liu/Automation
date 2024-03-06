@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Drawing;
-using System.Media;
 using System.Threading;
 using System.Windows.Forms;
 using Win32API;
 using AbinLibs;
+using Automation.Utils;
 
 namespace Automation
 {
@@ -40,9 +40,9 @@ namespace Automation
 		public Point ScreenToClient => Window.ScreenToClient(TargetWnd);
 
 		/// <summary>
-		/// Auto foregrounding mode
+		/// Auto foregrounding
 		/// </summary>
-		public ForegroundModes ForegroundMode { get; set; } = ForegroundModes.Never;
+		public bool AutoForeground { get; set; }
 
 		/// <summary> 
 		/// Thread error messages used by message window
@@ -52,34 +52,7 @@ namespace Automation
 		/// <summary> 
 		/// Start or stop sound alarm
 		/// </summary>
-		public bool Alerting
-		{
-			get
-			{
-				return m_alerting;
-			}
-
-			set
-			{
-				if (value)
-				{
-					if (!m_alerting)
-					{
-						m_alerting = true;
-						m_soundPlayerAlert.PlayLooping();
-					}
-					
-				}
-				else
-				{
-					if (m_alerting)
-					{
-						m_alerting = false;
-						m_soundPlayerAlert.Stop();
-					}					
-				}				
-			}
-		}
+		public bool Alerting { get => m_soundPlayer.Alerting; set => m_soundPlayer.Alerting = value; }		
 
 		/// <summary> 
 		/// Whether the thread is running
@@ -135,6 +108,8 @@ namespace Automation
 		/// </summary>
 		public AutomationThread()
 		{
+			m_thread.IsBackground = true;
+			m_ticker.IsBackground = true;
 			m_thread.OnStart = _OnStart;
 			m_thread.OnStop = _OnStop;
 			m_thread.ThreadProc = _ThreadProc;
@@ -197,30 +172,18 @@ namespace Automation
 
 		/// <summary> 
 		/// Sync lock
-		/// <param name="locker">Object to lock, use internal locker if null</param> 
 		/// </summary>
-		protected void Lock(object locker = null)
+		protected void Lock()
 		{
-			if (locker == null)
-			{
-				locker = m_locker;
-			}
-
-			m_thread.Lock(locker);
+			m_thread.Lock(m_locker);
 		}
 
 		/// <summary> 
 		/// Sync unlock
-		/// <param name="locker">Object to unlock, use internal locker if null</param> 
 		/// </summary>
-		protected void Unlock(object locker = null)
-		{
-			if (locker == null)
-			{
-				locker = m_locker;
-			}
-
-			m_thread.Lock(locker);
+		protected void Unlock()
+		{		
+			m_thread.Lock(m_locker);
 		}
 
 		#endregion
@@ -232,14 +195,7 @@ namespace Automation
 		/// <param name="start">Play start.wav is true, play stop.wav otherwise</param>
 		public void Beep(bool start = true)
 		{
-			if (start)
-			{
-				m_soundPlayerStart.Play();
-			}
-			else
-			{
-				m_soundPlayerStop.Play();				
-			}
+			m_soundPlayer.Beep(start);
 		}
 		#endregion
 
@@ -698,7 +654,7 @@ namespace Automation
 		protected virtual void Dispose(bool disposing)
 		{
 			// Check to see if Dispose has already been called.
-			if (!this.m_disposed)
+			if (!m_disposed)
 			{
 				if (disposing)
 				{
@@ -706,9 +662,7 @@ namespace Automation
 					m_dc.Dispose();
 					m_ticker.Dispose();
 					m_thread.Dispose();
-					m_soundPlayerStart.Dispose();
-					m_soundPlayerStop.Dispose();
-					m_soundPlayerAlert.Dispose();
+					m_soundPlayer.Dispose();
 				}
 
 				m_disposed = true;
@@ -720,12 +674,9 @@ namespace Automation
 		private EventThread m_thread = new EventThread();
 		private TickEventThread m_ticker = new TickEventThread();
 		private MemDC m_dc = new MemDC();
-		private bool m_alerting = false; // Sound alarm on?
 		private IntPtr m_messageWnd = IntPtr.Zero;
-		private object m_locker = new object(); // internal object for locking
-		private SoundPlayer m_soundPlayerStart = new SoundPlayer(Resources.ResourceManager.GetStream("Start"));
-		private SoundPlayer m_soundPlayerStop = new SoundPlayer(Resources.ResourceManager.GetStream("Stop"));
-		private SoundPlayer m_soundPlayerAlert = new SoundPlayer(Resources.ResourceManager.GetStream("Alert"));		
+		private ThreadSoundPlayer m_soundPlayer = new ThreadSoundPlayer();
+		private object m_locker = new object(); // internal object for locking			
 		private bool m_disposed = false;		
 
 		private void _OnStart()
@@ -775,24 +726,9 @@ namespace Automation
 			if (foregroundWnd == TargetWnd || foregroundWnd == m_messageWnd)
 			{
 				return;
-			}
+			}			
 
-			bool needForeground = false;
-			switch (ForegroundMode)
-			{
-				case ForegroundModes.Always:
-					needForeground = true;
-					break;
-
-				case ForegroundModes.CursorInClient:
-					needForeground = CursorInClient();
-					break;
-
-				default:
-					break;
-			}
-
-			if (needForeground)
+			if (AutoForeground)
 			{
 				SetTargetWndForeground();
 			}

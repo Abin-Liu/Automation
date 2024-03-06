@@ -48,12 +48,12 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="AutomationThread.cs" />
-    <Compile Include="ForegroundModes.cs" />
     <Compile Include="Libs\Locale.cs" />
     <Compile Include="Libs\Messagex.cs" />
     <Compile Include="Libs\Win32API.Hotkey.cs" />
     <Compile Include="Libs\Win32API.Input.cs" />
     <Compile Include="Libs\Win32API.Window.cs" />
+    <Compile Include="Utils\ThreadSoundPlayer.cs" />
     <Compile Include="Utils\LangBase.cs" />
     <Compile Include="Locales\zhCN.cs" />
     <Compile Include="Locales\zhTW.cs" />

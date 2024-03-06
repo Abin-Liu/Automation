@@ -13,6 +13,7 @@ namespace Automation.DemoApp
 {
 	public partial class Form1 : AutomationForm
 	{
+		protected override Keys Hotkey => Keys.Pause;
 		DemoThread m_thread = new DemoThread();
 
 		public Form1()
@@ -23,7 +24,6 @@ namespace Automation.DemoApp
 
 		private void Form1_Load(object sender, EventArgs e)
 		{
-			RegisterHotKey(0, Keys.Home);
 		}		
 
 		private void btnStart_Click(object sender, EventArgs e)

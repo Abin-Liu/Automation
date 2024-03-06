@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Windows.Forms;
 using Win32API;
 using UIToolkits;
@@ -12,6 +11,11 @@ namespace Automation
 	/// </summary>
 	public class AutomationForm : Form
 	{
+		/// <summary>
+		/// Hotkey to toggle thread
+		/// </summary>
+		protected virtual Keys Hotkey { get; }
+
 		/// <summary>
 		/// Whether hide main form (using a notification icon?)
 		/// </summary>
@@ -30,7 +34,38 @@ namespace Automation
 		/// <summary>
 		/// Handle of the target window
 		/// </summary>
-		protected IntPtr TargetWnd => m_thread != null ? m_thread.TargetWnd : IntPtr.Zero;		
+		protected IntPtr TargetWnd => m_thread != null ? m_thread.TargetWnd : IntPtr.Zero;
+
+		/// <summary>
+		/// Wether the form is configuring, it automatically registers/unregisters hotkey
+		/// </summary>
+		protected bool Configuring
+		{
+			get
+			{
+				return m_configuring;
+			}
+
+			set
+			{
+				if (value == m_configuring)
+				{
+					return;
+				}
+
+				m_configuring = value;
+				if (m_configuring)
+				{
+					UnregisterHotKey();
+				}
+				else
+				{
+					RegisterHotKey();
+				}
+			}
+		}
+
+		private const int HotkeyID = 51819;
 
 		/// <summary>
 		/// Default constructor
@@ -39,7 +74,6 @@ namespace Automation
 		{
 			Load += new EventHandler(AutomationForm_Load);
 			FormClosing += new FormClosingEventHandler(AutomationForm_FormClosing);
-			FormClosed += new FormClosedEventHandler(AutomationForm_FormClosed);
 		}
 
 		/// <summary>
@@ -113,7 +147,7 @@ namespace Automation
 		}
 
 		/// <summary>
-		/// 显示本窗口并置于前台
+		/// Show this window and set it foreground
 		/// </summary>
 		protected void ShowForm()
 		{
@@ -168,41 +202,6 @@ namespace Automation
 		protected virtual void OnMessage(int message, IntPtr wParam, IntPtr lParam) { }		
 
 		/// <summary>
-		/// Register a hotkey, whenever the user presses it, the form will be notified
-		/// <param name="id">Hotkey id</param>
-		/// <param name="key">Key value</param>
-		/// <param name="mods">Modifiers（Ctrl, Alt, Shift）, can be combined with | operator</param>
-		/// <returns>Return true if success, false otherwise.</returns>
-		/// </summary>
-		protected bool RegisterHotKey(int id, Keys key, Keys mods = Keys.None)
-		{
-			if (m_hotkeys.IndexOf(id) != -1)
-			{
-				return true; // already registered
-			}
-
-			if (!Hotkey.RegisterHotKey(Handle, id, key, mods))
-			{
-				return false;
-			}
-
-			m_hotkeys.Add(id);
-			return true;
-		}
-
-		/// <summary>
-		/// Unregister a hotkey
-		/// <param name="id">Hotkey id</param>		
-		/// </summary>
-		protected void UnregisterHotKey(int id)
-		{
-			if (m_hotkeys.Remove(id))
-			{
-				Hotkey.UnregisterHotKey(Handle, id);
-			}
-		}		
-
-		/// <summary>
 		/// Override WndProc
 		/// <param name="m">Message struct</param>		
 		/// </summary>
@@ -216,7 +215,15 @@ namespace Automation
 			{
 				case 0x0312: // Win32 WM_HOTKEY = 0x0312
 					int id = IntPtrToInt(wParam);
-					OnHotKey(id); // other hotkey
+					if (id == HotkeyID)
+					{
+						ToggleThread();
+					}
+					else
+					{
+						OnHotKey(id); // other hotkey
+					}
+					
 					break;
 
 				case AutomationThread.THREAD_MSG_ID:
@@ -245,7 +252,7 @@ namespace Automation
 
 		#region Private Members
 		private AutomationThread m_thread = null;
-		private List<int> m_hotkeys = new List<int>();
+		private bool m_configuring = false;
 
 		/// <summary>
 		/// Called upon Load event
@@ -257,6 +264,8 @@ namespace Automation
 				Hide();
 				ShowInTaskbar = false;
 			}
+
+			RegisterHotKey();
 		}
 
 		/// <summary>
@@ -274,29 +283,40 @@ namespace Automation
 			// Cleanup before close
 			if (!cancel)
 			{
-				CleanupBeforeClose();
+				Cleanup();
 			}
 
 			e.Cancel = cancel;
-		}
+		}		
 
-		/// <summary>
-		/// Called upon FormClosed event
-		/// </summary>
-		private void AutomationForm_FormClosed(object sender, FormClosedEventArgs e)
+		private void RegisterHotKey()
 		{
-			CleanupBeforeClose();
-		}
-
-		protected virtual void CleanupBeforeClose()
-		{
-			// cleanup
-			foreach (int id in m_hotkeys)
+			if (Hotkey == Keys.None)
 			{
-				Hotkey.UnregisterHotKey(Handle, id);
+				return;
 			}
 
-			m_hotkeys.Clear();
+			if (Win32API.Hotkey.RegisterHotKey(Handle, HotkeyID, Hotkey))
+			{
+				return;
+			}
+
+			Messagex.Error(this, $"Failed to register hotkey \"{Hotkey}\".");
+		}
+
+		private void UnregisterHotKey()
+		{
+			if (Hotkey == Keys.None)
+			{
+				return;
+			}
+
+			Win32API.Hotkey.UnregisterHotKey(Handle, HotkeyID);
+		}
+
+		private void Cleanup()
+		{
+			UnregisterHotKey();
 
 			IntPtr targetWnd = TargetWnd;
 			if (targetWnd != IntPtr.Zero && !Window.IsWindowVisible(targetWnd))
